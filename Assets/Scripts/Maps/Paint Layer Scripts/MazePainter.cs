@@ -8,13 +8,14 @@ using UnityEngine.Tilemaps;
 [RequireComponent(typeof(GridMap))]
 [RequireComponent(typeof(Tilemap))]
 
-public class FloorPainter : MonoBehaviour
+public class MazePainter : MonoBehaviour
 {
     // Properties
     Tilemap tileMap;
     GridMap gridMap;
     TilemapRenderer tilemapRenderer;
 
+    [SerializeField] TileBase wall;
     [SerializeField] TileBase floor1;
     [SerializeField] TileBase floor2;
 
@@ -52,6 +53,12 @@ public class FloorPainter : MonoBehaviour
 
     void PutFloor(int x, int y)
     {
+        if(x==0 || y == 0 || x == gridRowCount-1 || y == gridColCount-1)
+        {
+            tileMap.SetTile(new Vector3Int(x, y, 0), wall);
+            return;
+        }
+
         bool randomBool = new System.Random().Next(2) == 0;
 
         if (randomBool == true)

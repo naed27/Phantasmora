@@ -18,9 +18,6 @@ public class GroundPainter : MonoBehaviour
     [SerializeField] TileBase ground1;
     [SerializeField] TileBase ground2;
 
-    private Tile wallTile;
-    public GameObject wallPrefab;
-
     [SerializeField] int gridRowCount;
     [SerializeField] int gridColCount;
 
@@ -39,10 +36,6 @@ public class GroundPainter : MonoBehaviour
         gridMap.Init(gridRowCount, gridColCount);
         UpdateTileMap();
         tilemapRenderer.sortingOrder = 7;
-
-        wallTile = ScriptableObject.CreateInstance<Tile>();
-        wallTile.gameObject = wallPrefab;
-
 
     }
 
@@ -68,7 +61,7 @@ public class GroundPainter : MonoBehaviour
         }
         else
         {
-            tileMap.SetTile(new Vector3Int(x, y, 0), wallTile);
+            tileMap.SetTile(new Vector3Int(x, y, 0), ground2);
         }
     }
 }
