@@ -527,7 +527,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ground1: {fileID: 11400000, guid: 88a993686d036dd4e93aaa71fb295a0d, type: 2}
   ground2: {fileID: 11400000, guid: 4fdf1a6222352f74597e187eb3846a99, type: 2}
-  wallPrefab: {fileID: 867801028739191350, guid: 670bfbc281e8c7e48b6d49454dd67f66, type: 3}
   gridRowCount: 20
   gridColCount: 20
 --- !u!114 &565310022
@@ -703,10 +702,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 73f6747d40da8ad4595c4028307b1eb4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  floor1: {fileID: 11400000, guid: f1295562e4ef0f9449b747826b046ac6, type: 2}
-  floor2: {fileID: 11400000, guid: f1295562e4ef0f9449b747826b046ac6, type: 2}
-  gridRowCount: 0
-  gridColCount: 0
+  wall: {fileID: 11400000, guid: 4015a83208907d74392f95ea2b44ce1a, type: 2}
+  floor1: {fileID: 11400000, guid: 4fdf1a6222352f74597e187eb3846a99, type: 2}
+  floor2: {fileID: 11400000, guid: a199bb5e55c7dbf45857849988fd7fc0, type: 2}
+  gridRowCount: 16
+  gridColCount: 16
 --- !u!114 &2103790900
 MonoBehaviour:
   m_ObjectHideFlags: 0
