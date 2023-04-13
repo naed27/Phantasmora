@@ -4,46 +4,72 @@ using UnityEngine;
 
 public class GridMap : MonoBehaviour
 {
+    Cell[,] grid;
+
+    public int cellSize;
     public int rowCount;
     public int colCount;
 
-    bool[,] grid;
+    public GameObject wallPrefab;
+    public GameObject floorPrefab;
 
-    public void Init(int length, int height)
+    public void Initialize(int rowCount, int colCount)
     {
-        grid = new bool[length, height];
-        this.rowCount = length;
-        this.colCount = height;
-    }
+        grid = new Cell[rowCount, colCount];
+        this.rowCount = rowCount;
+        this.colCount = colCount;
 
-    public void Set(int x, int y, bool display)
-    {
-        if (!CheckPosition(x, y))
+        for (int x = 0; x < rowCount; x++)
         {
-            return;
+            for (int y = 0; y < colCount; y++)
+            {
+                Cell cell = new();
+                if(this.IsEdgeOfGrid(x,y,rowCount,colCount))
+                    cell.isWall = true;
+                else
+                    cell.isWall = false;
+                grid[x, y] = cell;
+            }
         }
 
-        grid[x, y] = display;    
     }
 
-    public bool Get(int x, int y)
-    {
-        if (!CheckPosition(x, y))
-        {
-            return false;
-        }
-        return grid[x, y];
-    }
-
-    public bool CheckPosition(int x, int y)
+    public void DrawMaze()
     {
 
-        if(x < 0 || x >= rowCount || x < 0 || y >= colCount)
+        Gizmos.color = Color.yellow;
+        float xBase = -(rowCount) + (cellSize / 2);
+        float yBase = (colCount) - (cellSize / 2);
+
+        GameObject prefab;
+
+        for (int y = 0; y < colCount; y++)
         {
-            Debug.LogWarning("Coordinates out of bounds.");
-            return false;
+            for (int x = 0; x < rowCount; x++)
+            {
+                Cell cell = grid[x, y];
+                if (cell.isWall)
+                    prefab = this.wallPrefab;
+                else
+                    prefab = this.floorPrefab;
+
+                Vector3 spawnPosition = new(xBase + (x*cellSize), yBase - (y*cellSize), 0);
+                Instantiate(prefab, spawnPosition, Quaternion.identity);
+            }
         }
 
-        return true;
     }
+
+    bool IsEdgeOfGrid(int x, int y, int gridWidth, int gridHeight)
+    {
+        bool isOnEdge = false;
+
+        if (x == 0 || y == 0 || x == gridWidth - 1 || y == gridHeight - 1)
+        {
+            isOnEdge = true;
+        }
+
+        return isOnEdge;
+    }
+
 }

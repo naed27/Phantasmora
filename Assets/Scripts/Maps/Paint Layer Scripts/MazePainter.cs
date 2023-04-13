@@ -19,46 +19,60 @@ public class MazePainter : MonoBehaviour
     [SerializeField] TileBase floor1;
     [SerializeField] TileBase floor2;
 
-    [SerializeField] int gridRowCount;
-    [SerializeField] int gridColCount;
+    [SerializeField] int mazeRowCount;
+    [SerializeField] int mazeColCount;
 
     // Start is called before the first frame update
     void Start()
     {
         transform.position = new Vector3(
-            (gridRowCount * -1), // to center x
-            (gridColCount * -1), // to center y
+            (mazeRowCount * -1), // to center x
+            (mazeColCount * -1), // to center y
             (transform.position.z) // to keep z
         );
 
         tileMap = GetComponent<Tilemap>();
         gridMap = GetComponent<GridMap>();
         tilemapRenderer = GetComponent<TilemapRenderer>();
-        gridMap.Init(gridRowCount, gridColCount);
-        UpdateTileMap();
+        gridMap.Initialize(mazeRowCount, mazeColCount);
+        DrawMaze();
         tilemapRenderer.sortingOrder = 8;
     }
 
     // Update is called once per frame
-    void UpdateTileMap()
+    void DrawMaze()
     {
-        for (int x = 0; x < gridMap.rowCount; x++)
+        this.DrawOuterWalls(gridMap);
+        this.DrawInnerWalls(gridMap);
+    }
+
+    void DrawOuterWalls(GridMap gridMap)
+    {
+        for(int i=0; i < gridMap.colCount; i++)
         {
-            for (int y = 0; y < gridMap.colCount; y++)
-            {
-                PutFloor(x, y);
-            }
+            tileMap.SetTile(new Vector3Int(0, i, 0), wall);
+            tileMap.SetTile(new Vector3Int(i, 0, 0), wall);
         }
+
+        for (int j = gridMap.colCount-1; j > 0; j--)
+        {
+            tileMap.SetTile(new Vector3Int(gridMap.colCount - 1, j, 0), wall);
+            tileMap.SetTile(new Vector3Int(j, gridMap.colCount - 1, 0), wall);
+        }
+    }
+
+    void DrawInnerWalls(GridMap gridMap)
+    {
+        DetermineStartPoints();
+    }
+
+    void DetermineStartPoints()
+    {
+
     }
 
     void PutFloor(int x, int y)
     {
-        if(x==0 || y == 0 || x == gridRowCount-1 || y == gridColCount-1)
-        {
-            tileMap.SetTile(new Vector3Int(x, y, 0), wall);
-            return;
-        }
-
         bool randomBool = new System.Random().Next(2) == 0;
 
         if (randomBool == true)
@@ -67,9 +81,10 @@ public class MazePainter : MonoBehaviour
         }
         else
         {
-            tileMap.SetTile(new Vector3Int(x, y, 0), floor2);
+            tileMap.SetTile(new Vector3Int(x, y, 0), wall);
         }
     }
+
 }
 
 

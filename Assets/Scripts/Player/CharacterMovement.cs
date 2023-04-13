@@ -6,18 +6,20 @@ public class CharacterMovement : MonoBehaviour
 {
 
     // Properties
-    [SerializeField]
-    private float moveSpeed = 1;
+    [SerializeField] float moveSpeed;
+
+    Rigidbody2D rb;
+    Vector2 movement;
     Animator animator;
-    Rigidbody2D rigidBody2D;
-    float scaleX = 1;
+
+    private float scaleX = 1;
 
 
     // Start is called before the first frame update
     void Start()
     {
+        rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
-        rigidBody2D = GetComponent<Rigidbody2D>();
         scaleX = transform.localScale.x;
     }
 
@@ -25,18 +27,22 @@ public class CharacterMovement : MonoBehaviour
     void Update()
     {
 
-        Vector2 velocity = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical")).normalized * moveSpeed;
-        rigidBody2D.velocity = velocity;
-        animator.SetFloat("Speed", velocity.sqrMagnitude);
+        movement.x = Input.GetAxisRaw("Horizontal");
+        movement.y = Input.GetAxisRaw("Vertical");
+        animator.SetFloat("Speed", movement.sqrMagnitude);
 
-
-        if(velocity.x != 0)
+        if (movement.x != 0)
         {
             // Flip Animation
             Vector3 scale = transform.localScale;
-            scale.x = scaleX * (velocity.x >= 0 ? 1 : -1);
+            scale.x = scaleX * (movement.x >= 0 ? 1 : -1);
             transform.localScale = scale;
         }
+    }
      
+    void FixedUpdate()
+    {
+        //rb.MovePosition(rb.position + movement * moveSpeed * Time.fixedDeltaTime);
+        rb.MovePosition(rb.position + movement.normalized * moveSpeed * Time.fixedDeltaTime);
     }
 }
