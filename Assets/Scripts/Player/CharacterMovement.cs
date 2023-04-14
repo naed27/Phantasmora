@@ -43,6 +43,6 @@ public class CharacterMovement : MonoBehaviour
     void FixedUpdate()
     {
         //rb.MovePosition(rb.position + movement * moveSpeed * Time.fixedDeltaTime);
-        rb.MovePosition(rb.position + movement.normalized * moveSpeed * Time.fixedDeltaTime);
+        rb.MovePosition(rb.position + moveSpeed * Time.fixedDeltaTime * movement.normalized);
     }
 }

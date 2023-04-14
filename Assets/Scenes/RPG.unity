@@ -182,6 +182,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 1611011285440757437, guid: c8c61c39afd1a0d479bd2257edaffd3b, type: 3}
+      propertyPath: moveSpeed
+      value: 3
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c8c61c39afd1a0d479bd2257edaffd3b, type: 3}
 --- !u!1 &519420028
@@ -315,7 +319,6 @@ GameObject:
   - component: {fileID: 565310020}
   - component: {fileID: 565310019}
   - component: {fileID: 565310022}
-  - component: {fileID: 565310021}
   m_Layer: 0
   m_Name: Ground
   m_TagString: Untagged
@@ -513,20 +516,6 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
---- !u!114 &565310021
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 565310017}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fdae77f5808e8f5479dba4947d3c7b2d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  groundRowCount: 10
-  groundColCount: 10
 --- !u!114 &565310022
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -540,8 +529,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cellSize: 2
-  rowCount: 0
-  colCount: 0
+  rowCount: 10
+  colCount: 10
   wallPrefab: {fileID: 867801028739191350, guid: 670bfbc281e8c7e48b6d49454dd67f66, type: 3}
   floorPrefab: {fileID: 5848866807638792365, guid: 961cb9760697857438931fdd510bfe7b, type: 3}
 --- !u!1001 &1630285531
