@@ -88,5 +88,14 @@ public class Helper
 
         return false;
     }
+
+
+    public static Vector3 GetVectorFromAngle(float angle)
+    {
+        // angle = 0 -> 360
+
+        float angleRadius = angle * (Mathf.PI / 180f);
+        return new Vector3(Mathf.Cos(angleRadius), Mathf.Sin(angleRadius));
+    }
 }
 

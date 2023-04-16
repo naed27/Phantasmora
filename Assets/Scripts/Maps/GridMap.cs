@@ -95,6 +95,7 @@ public class GridMap : MonoBehaviour
                 {
                     GameObject gameObject = Instantiate(prefab, spawnPosition, Quaternion.identity);
                     gameObject.name = "Cell("+x.ToString()+", "+y.ToString()+")";
+                    gameObject.transform.SetParent(transform);
                 }
                 if (cell.IsSpawnPoint())
                 {
