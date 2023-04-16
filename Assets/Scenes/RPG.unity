@@ -528,9 +528,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0bed967317db9c240b11e01e67d226e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cellSize: 2
-  rowCount: 10
-  colCount: 10
+  gridSize: 20
+  Player: {fileID: 1841138937}
   wallPrefab: {fileID: 867801028739191350, guid: 670bfbc281e8c7e48b6d49454dd67f66, type: 3}
   floorPrefab: {fileID: 5848866807638792365, guid: 961cb9760697857438931fdd510bfe7b, type: 3}
 --- !u!1001 &1630285531
@@ -594,6 +593,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c5c34d343b30a5840b3234feaf58fa1e, type: 3}
+--- !u!1 &1841138937 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1611011285440757435, guid: c8c61c39afd1a0d479bd2257edaffd3b, type: 3}
+  m_PrefabInstance: {fileID: 72546515}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1858429246 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1611011285440757433, guid: c8c61c39afd1a0d479bd2257edaffd3b, type: 3}

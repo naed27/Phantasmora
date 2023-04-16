@@ -6,58 +6,66 @@ using UnityEngine;
 public class GridMap : MonoBehaviour
 {
     readonly private int cellSize = 2;
+    readonly private int walkerCount = 2;
 
-    private Cell[,] grid;
+    public Cell[,] grid;
 
     public int gridSize;
-    private int rowCount;
-    private int colCount;
-    private int walkerCount;
+    public int rowCount;
+    public int colCount;
 
     private Cell endPoint;
-    private Cell[] walkers;
+    private Walker[] walkers;
 
     public GameObject Player;
     public GameObject wallPrefab;
     public GameObject floorPrefab;
+    public GameObject doorPrefab;
 
     void Start()
     {
-        this.PrepareMazeFoundation();
-        this.SpawnWalkers();
+        this.SetupMazeCells();
+        this.NetworkNeighbors();
         this.DetermineEndPoint();
-        this.PrepareInnerWalls();
+        this.SpawnWalkers();
+        this.ActivateWalkers();
         this.ExpandEndPoint();
+        //this.ConnectPaths();
         this.DrawMaze();
 
     }
 
  
 
-    private void PrepareMazeFoundation()
+    private void SetupMazeCells()
     {
         // Setup values for properties
-        if (gridSize < 20) this.gridSize = 20;
-        if (gridSize > 50) this.gridSize = 50;
+        if (this.gridSize < 20) this.gridSize = 20;
+        if (this.gridSize > 50) this.gridSize = 50;
         this.rowCount = this.gridSize;
         this.colCount = this.gridSize;
+        
 
-        float rawCalc = ((this.rowCount + this.colCount) / 2) / 3;
-        this.walkerCount = (int)Math.Floor(rawCalc);
         this.grid = new Cell[this.rowCount, this.colCount];
 
         for (int x = 0; x < this.rowCount; x++)
-        {
             for (int y = 0; y < this.colCount; y++)
             {
-                Cell cell = new(x,y);
+                Cell cell = new(x,y,this);
                 if(Helper.IsEdgeOfGrid(x,y, this.rowCount, this.colCount))
                     cell.tile = "edge";
                 else
                     cell.tile = "null";
                 this.grid[x, y] = cell;
             }
-        }
+
+    }
+    private void NetworkNeighbors()
+    {
+
+        for (int x = 0; x < this.rowCount; x++)
+            for (int y = 0; y < this.colCount; y++)
+                this.grid[x, y].DetermineNeighbors();
 
     }
 
@@ -75,19 +83,28 @@ public class GridMap : MonoBehaviour
             for (int x = 0; x < this.rowCount; x++)
             {
                 Cell cell = grid[x, y];
-                if (cell.tile == "wall" || cell.tile == "edge")
+                if (cell.IsWall() || cell.IsEdge())
                     prefab = this.wallPrefab;
-                else if(cell.tile == "floor" || cell.tile == "end")
+                else if (cell.IsFloor() || cell.IsSpawnPoint())
                     prefab = this.floorPrefab;
+                else if (cell.IsGoalPoint())
+                    prefab = this.doorPrefab;
 
                 Vector3 spawnPosition = new(xBase + (x*cellSize), yBase - (y*cellSize), 0);
                 if (prefab)
                 {
+                    if (cell.IsGoalPoint())
+                    {
+                        GameObject doorFloor = Instantiate(this.floorPrefab, spawnPosition, Quaternion.identity);
+                        doorFloor.name = "Cell(" + x.ToString() + ", " + y.ToString() + ", 1)";
+                    }
+
                     GameObject gameObject = Instantiate(prefab, spawnPosition, Quaternion.identity);
                     gameObject.name = "Cell("+x.ToString()+", "+y.ToString()+")";
                 }
-                if (cell.tile == "end")
+                if (cell.IsSpawnPoint())
                 {
+                    Debug.Log("run!");
                     this.Player.transform.position = spawnPosition;
                 }
             }
@@ -97,15 +114,13 @@ public class GridMap : MonoBehaviour
 
     private void SpawnWalkers()
     {
-        Cell[] walkers = new Cell[this.walkerCount];
+        Walker[] walkers = new Walker[this.walkerCount];
 
-        int[] xIndexes = Helper.GenerateRandomNumbersRange(1, this.rowCount - 2, this.walkerCount);
-        int[] yIndexes = Helper.GenerateRandomNumbersRange(1, this.colCount - 2, this.walkerCount);
+        int[] x = Helper.GenerateRandomNumbersRange(1, this.rowCount - 2, this.walkerCount);
+        int[] y = Helper.GenerateRandomNumbersRange(1, this.colCount - 2, this.walkerCount);
 
         for (int i = 0; i < this.walkerCount; i++)
-        {
-            walkers[i] = this.grid[xIndexes[i], yIndexes[i]];
-        }
+            walkers[i] = new Walker(this.grid[x[i], y[i]], this);
 
         this.walkers = walkers;
     }
@@ -114,7 +129,7 @@ public class GridMap : MonoBehaviour
     {
 
         int n1 = Helper.GenerateRandomNumberEither(0, this.rowCount - 1);
-        int n2 = Helper.GenerateRandomNumber(0, this.rowCount - 1);
+        int n2 = Helper.GenerateRandomNumber(1, this.rowCount - 2);
 
         if (Helper.GenerateRandomBool())
         {
@@ -124,168 +139,51 @@ public class GridMap : MonoBehaviour
         }
 
         this.endPoint = this.grid[n1, n2];
-        this.endPoint.tile = "end";
-
+        this.endPoint.tile = "goal";
     }
 
-    private void PrepareInnerWalls()
+    private void ActivateWalkers()
     {
         for (int i = 0; i < this.walkers.Length; i++)
-        {
-            this.Walk(
-                this.walkers[i],
-                null,
-                "walker_path_" + i.ToString(),
-                true
-            );
-        }
+            this.walkers[i].Walk();
     }
 
-    private void Walk(Cell currentCell, Cell previousCell, string pathId, bool isAdvancing)
+
+    public bool IsWithinGrid(int x, int y)
     {
-        string consoleMessage = "";
-
-        consoleMessage += "-----------------\n";
-        consoleMessage += ((isAdvancing) ? "Advancing ":"Returning ") +"Cell #" + currentCell.id;
-
-        if (currentCell.IsSameCell(this.endPoint)) {
-            consoleMessage += " > This cell is the endpoint.";
-            Debug.Log(consoleMessage);
-            return;
-        };
-
-        currentCell.tile = "floor";
-
-        Cell[] neighbors = Helper.FilterGrid(
-            this.GetCellNeighbors(currentCell), 
-            x => (isAdvancing) ?
-               !x.IsEdge()
-            && !x.IsDeadEnd()
-            && !x.IsEndPoint()
-            && !x.IsWithinPath(pathId)
-            && !x.IsSameCell(previousCell)
-            :
-               !x.IsEdge()
-            && !x.IsDeadEnd()
-            && !x.IsEndPoint()
-            && !x.IsWithinPath(pathId)
-            && !x.IsSameCell(previousCell)
-        );
-
-
-        consoleMessage += "> Neighbors (" + neighbors.Length+") [";
-        for (int n = 0; n < neighbors.Length; n++)
+        if(x > 0 && x < this.rowCount-1 && y > 0 && y < this.colCount-1)
         {
-            consoleMessage += neighbors[n].id;
-            if (n != neighbors.Length - 1) consoleMessage += ", ";
+            return true;
+
         }
-        consoleMessage += "]";
-
-        if (neighbors.Length == 0)
-        {
-
-            consoleMessage += " > It's a dead end";
-            currentCell.isDeadEnd = true;
-
-            if (currentCell.previousCell == null) return;
-
-            consoleMessage += " > Returning.";
-            Walk(currentCell.previousCell, currentCell, pathId, false);
-            Debug.Log(consoleMessage);
-            return;
-        }
-
-
-        if(currentCell.pathId==null)
-        {
-            currentCell.pathId = pathId;
-            currentCell.previousCell = previousCell;
-        }
-
-        int nextIndex = Helper.GenerateRandomNumber(0, neighbors.Length - 1);
-        Cell nextCell = neighbors[nextIndex];
-        Debug.Log(consoleMessage);
-
-        Helper.RemoveAt(ref neighbors, nextIndex);
-        this.PrepareWalls(neighbors, pathId);
-        Walk(nextCell, currentCell, pathId, true);
-        return;
- 
+        return false;
     }
 
-    private Cell[] GetCellNeighbors(Cell cell)
+    private void ForceFloor(int x, int y, bool isPlayerSpawnPoint = false)
     {
-        (int x, int y) = cell.coordinates;
-        return new Cell[] {
-           this.GetCell(x-1,y),
-           this.GetCell(x+1,y),
-           this.GetCell(x,y-1),
-           this.GetCell(x,y+1)
-        };
-    }
-
-    private bool IsValidCoordinates(int x, int y)
-    {
-        if(x < 0 || x >= this.rowCount || y < 0 || y >= colCount)
+        if(this.IsWithinGrid(x, y))
         {
-            return false;
-        }
-        return true;
-    }
+            Cell cell = this.grid[x, y];
 
-    private Cell GetCell(int x, int y)
-    {
-        if(this.IsValidCoordinates(x, y))
-        {
-            return this.grid[x, y];
+            if (isPlayerSpawnPoint)
+                cell.tile = "spawn";
+            else
+                cell.tile = "floor";
         }
-        return null;
-    }
-
-    private void ForceFloor(int x, int y)
-    {
-        if (this.IsValidCoordinates(x, y))
-        {
-            this.grid[x, y].tile = "floor";
-            return;
-        }
-        return;
     }
 
     private void ExpandEndPoint()
     {
         (int x, int y) = this.endPoint.coordinates;
 
-        if (y == 0 || y == this.colCount - 1) this.ForceFloor(x + 0, y - 1);
-        if (y == 0 || y == this.colCount - 1) this.ForceFloor(x + 0, y + 1);
-        if (x == 0 || x == this.rowCount - 1) this.ForceFloor(x + 1, y + 0);
-        if (x == 0 || x == this.rowCount - 1) this.ForceFloor(x - 1, y + 0);
+        if (y == 0 || y == this.colCount - 1) this.ForceFloor(x + 0, y - 1, true);
+        if (y == 0 || y == this.colCount - 1) this.ForceFloor(x + 0, y + 1, true);
+        if (x == 0 || x == this.rowCount - 1) this.ForceFloor(x + 1, y + 0, true);
+        if (x == 0 || x == this.rowCount - 1) this.ForceFloor(x - 1, y + 0, true);
         this.ForceFloor(x - 1, y + 1);
         this.ForceFloor(x + 1, y + 1);
         this.ForceFloor(x + 1, y - 1);
         this.ForceFloor(x - 1, y - 1);
     }
-
-    private void PrepareWalls(Cell[] cells, string pathId)
-    {
-        for(int i = 0; i < cells.Length; i++)
-        {
-            Cell cell = cells[i];
-            if (cell.IsNull()) {
-                cell.tile = "wall";
-            }
-            else
-            {
-                if (Helper.GenerateRandomNumber(1, this.walkerCount-2) == 1)
-                {
-                    cell.tile = "wall";
-                }
-            }
-            cell.pathId = pathId;
-        }
-
-    }
-    
-
 
 }

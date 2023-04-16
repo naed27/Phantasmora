@@ -48,16 +48,25 @@ public class Helper
         }
     }
 
-    public static bool GenerateRandomBool()
-    {
-        int randomInt = UnityEngine.Random.Range(0, 2);
-        return (randomInt == 0) ? false : true;
-    }
+    public static bool GenerateRandomBool() { return UnityEngine.Random.Range(0, 2) != 0; }
 
 
-    public static Cell[] FilterGrid(Cell[] array, Func<Cell, bool> condition)
+    public static Cell[] FilterArray(Cell[] array, Func<Cell, bool> condition)
     {
         return array.Where(x => condition(x)).ToArray();
+    }
+
+    public static List<T> FilterList<T>(List<T> inputList, Func<T, bool> condition)
+    {
+        List<T> outputList = new ();
+        foreach (T item in inputList)
+        {
+            if (condition(item))
+            {
+                outputList.Add(item);
+            }
+        }
+        return outputList;
     }
 
     public static void RemoveAt<T>(ref T[] arr, int index)
@@ -69,6 +78,15 @@ public class Helper
         }
         // finally, let's decrement Array's size by one
         Array.Resize(ref arr, arr.Length - 1);
+    }
+
+    public static bool IsElementInArray<T>(T[] array, T element)
+    {
+        for (int i = 0; i < array.Length; i++)
+            if (array[i].Equals(element))
+                return true;
+
+        return false;
     }
 }
 
