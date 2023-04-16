@@ -11,8 +11,8 @@ public class GridMap : MonoBehaviour
     public Cell[,] grid;
 
     public int gridSize;
-    public int rowCount;
-    public int colCount;
+    private int rowCount;
+    private int colCount;
 
     private Cell endPoint;
     private Walker[] walkers;
@@ -93,18 +93,11 @@ public class GridMap : MonoBehaviour
                 Vector3 spawnPosition = new(xBase + (x*cellSize), yBase - (y*cellSize), 0);
                 if (prefab)
                 {
-                    if (cell.IsGoalPoint())
-                    {
-                        GameObject doorFloor = Instantiate(this.floorPrefab, spawnPosition, Quaternion.identity);
-                        doorFloor.name = "Cell(" + x.ToString() + ", " + y.ToString() + ", 1)";
-                    }
-
                     GameObject gameObject = Instantiate(prefab, spawnPosition, Quaternion.identity);
                     gameObject.name = "Cell("+x.ToString()+", "+y.ToString()+")";
                 }
                 if (cell.IsSpawnPoint())
                 {
-                    Debug.Log("run!");
                     this.Player.transform.position = spawnPosition;
                 }
             }
@@ -152,10 +145,7 @@ public class GridMap : MonoBehaviour
     public bool IsWithinGrid(int x, int y)
     {
         if(x > 0 && x < this.rowCount-1 && y > 0 && y < this.colCount-1)
-        {
             return true;
-
-        }
         return false;
     }
 

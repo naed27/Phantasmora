@@ -12,8 +12,6 @@ public class Walker
     private Cell goalPoint;
     private bool isAdvancing;
 
-    private int walkCount = 0;
-    private int walkLimit = 50;
     private int retreatCount = 0;
 
     readonly private List<Cell> deadEnds = new();
