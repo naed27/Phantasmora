@@ -8,17 +8,17 @@ TagManager:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Player
   - Water
   - UI
-  - Player
+  - Field View
+  - Game View
+  - Wall Unseen
+  - 
   - Ground
-  - Walls
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Darkness
+  - Wall Seen
+  - Sensor
   - 
   - 
   - 
