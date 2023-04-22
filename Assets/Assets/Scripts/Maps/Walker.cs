@@ -5,7 +5,7 @@ public class Walker
 {
     private string id;
 
-    private GridMap grid;
+    private DungeonManager grid;
 
     private Cell head;
     private Cell start;
@@ -18,7 +18,7 @@ public class Walker
     readonly private List<Cell> wallsCache = new();
     readonly private List<Cell> pathHistory = new();
 
-    public Walker(Cell startPoint, GridMap grid)
+    public Walker(Cell startPoint, DungeonManager grid)
     {
         this.id = "Walker_" + startPoint.id;
         this.start = startPoint;

@@ -3,30 +3,33 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Tile Fade Sensor
+  - Player Vision Sensor
+  - Tile Sensor
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - Player
+  - 
   - Water
   - UI
-  - Field View
-  - Game View
-  - Wall Unseen
   - 
+  - 
+  - 
+  - Wall
   - Ground
+  - 
+  - 
   - Darkness
-  - Wall Seen
-  - Sensor
   - 
   - 
   - 
   - 
   - 
-  - 
-  - 
-  - 
+  - Field View
+  - Power View
+  - Player
   - 
   - 
   - 

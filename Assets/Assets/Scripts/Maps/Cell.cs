@@ -7,12 +7,12 @@ public class Cell
     public string tile;
 
     public Coordinate coordinates;
-    public GridMap gridMap;
+    public DungeonManager gridMap;
     public List<Cell> neighbors = new();
     public int wallInstance = 0;
 
 
-    public Cell(int x, int y, GridMap gridMap)
+    public Cell(int x, int y, DungeonManager gridMap)
     {
         this.id = "(" + x.ToString()+ ", " + y.ToString() +")";
         this.coordinates = new Coordinate(x, y);
