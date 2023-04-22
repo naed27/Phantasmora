@@ -16,13 +16,15 @@ public class PowerView : MonoBehaviour
     // ------------------ mesh properties
 
     private Mesh _mesh;
-    private GameObject _playerObject;
+    private Player _playerObject;
     private LayerMask _masksToCollideWith;
 
     private int _raySpan;
     private int _rayCount;
     private float _rayAngle;
-    private float _rayLength;
+
+    //private float _originalRayLength;
+    private float _currentRayLength;
 
     private int[] _triangles;
     private Vector3[] _vertices;
@@ -30,9 +32,9 @@ public class PowerView : MonoBehaviour
 
     // ---------------- setters and getters
 
-    public float RayLength { get { return _rayLength; } }
+    public float RayLength { get { return _currentRayLength; } }
 
-    public void Init(GameObject player, LayerMask maskToCollideWith)
+    public void Init(Player player, LayerMask maskToCollideWith)
     {
         // Setup Properties
         _playerObject = player;
@@ -44,10 +46,12 @@ public class PowerView : MonoBehaviour
         _meshDrawOrigin = Vector3.zero;
         GetComponent<MeshFilter>().mesh = _mesh;
 
-        //rayLength = 0;
         _raySpan = 360;
         _rayCount = 360;
         _rayAngle = _raySpan / _rayCount;
+
+        _currentRayLength = 0;
+        //_originalRayLength = 0;
 
         _vertices = new Vector3[_rayCount + 2];
         _triangles = new int[_rayCount * 3];
@@ -56,9 +60,6 @@ public class PowerView : MonoBehaviour
 
     private void Update()
     {
-
-        
-
         UpdateFieldOfView();
         UpdateMeshPosition();
     }
@@ -79,10 +80,10 @@ public class PowerView : MonoBehaviour
 
         for (int i = 0; i < _vertices.Length - 1; i++)
         {
-            RaycastHit2D rayCast = Physics2D.Raycast(rayCastOrigin, Helper.GetVectorFromAngle(-(_rayAngle * (i))), _rayLength, _masksToCollideWith);
+            RaycastHit2D rayCast = Physics2D.Raycast(rayCastOrigin, Helper.GetVectorFromAngle(-(_rayAngle * (i))), _currentRayLength, _masksToCollideWith);
 
             if (rayCast.collider == null)
-                _vertices[i + 1] = _meshDrawOrigin + Helper.GetVectorFromAngle(-(_rayAngle * (i))) * _rayLength;
+                _vertices[i + 1] = _meshDrawOrigin + Helper.GetVectorFromAngle(-(_rayAngle * (i))) * _currentRayLength;
             else
                 _vertices[i + 1] = rayCast.point - rayCastOrigin;
 
@@ -101,12 +102,12 @@ public class PowerView : MonoBehaviour
 
     public void Enlarge()
     {
-        if (_rayLength < 10) _rayLength += enlargeSpeed - (_rayLength * speedOffset);
+        if (_currentRayLength < 10) _currentRayLength += enlargeSpeed - (_currentRayLength * speedOffset);
     }
 
     public void Shrink()
     {
-        if (_rayLength > 0) _rayLength -= shrinkSpeed;
+        if (_currentRayLength > 0) _currentRayLength -= shrinkSpeed;
     }
 
 

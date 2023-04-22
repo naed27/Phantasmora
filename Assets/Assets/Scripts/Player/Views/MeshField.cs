@@ -5,22 +5,22 @@ using System.Linq;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 
-public class FieldView : MonoBehaviour
+public class MeshField : MonoBehaviour
 {
     // ------------------ modifier properties
 
-    [SerializeField] private float enlargeSpeed = 0.025f;
-    [SerializeField] private float shrinkSpeed = 0.05f;
-    [SerializeField] private float speedOffset = 0.01f;
+    [SerializeField] private float _originalRayLength = 0f;
+    [SerializeField] private float _enlargeSpeed = 0.025f;
+    [SerializeField] private float _shrinkSpeed = 0.05f;
+    [SerializeField] private float _speedOffset = 0.01f;
 
     // ------------------ mesh properties
 
     private Mesh _mesh;
-    private GameObject _playerObject;
+    private Player _playerObject;
     private LayerMask _masksToCollideWith;
 
-    private float _originalRayLength;
-    private float _rayLength;
+    private float _currentRayLength;
 
     private int _raySpan;
     private int _rayCount;
@@ -32,25 +32,25 @@ public class FieldView : MonoBehaviour
 
     // ---------------- setters and getters
 
-    public float RayLength { get { return _rayLength; } }
+    public float RayLength { get { return _currentRayLength; } }
 
+    public float OriginalRayLength { get { return _originalRayLength; } }
 
-    public void Init(GameObject player, LayerMask maskToCollideWith)
+    public void Init(Player player, LayerMask maskToCollideWith)
     {
         // Setup Properties
         _playerObject = player;
         _masksToCollideWith = maskToCollideWith;
 
         // Create a new mesh
-
         _mesh = new Mesh();
         _meshDrawOrigin = Vector3.zero;
         GetComponent<MeshFilter>().mesh = _mesh;
 
+        // Setup mesh
         _raySpan = 360;
         _rayCount = 360;
-        _rayLength = 3.5f;
-        _originalRayLength = 3.5f;
+        _currentRayLength = _originalRayLength;
         _rayAngle = _raySpan / _rayCount;
 
         _vertices = new Vector3[_rayCount + 2];
@@ -80,10 +80,10 @@ public class FieldView : MonoBehaviour
 
         for (int i = 0; i < _vertices.Length-1; i++)
         {
-            RaycastHit2D rayCast = Physics2D.Raycast(rayCastOrigin, Helper.GetVectorFromAngle(-(_rayAngle * (i))), _rayLength, _masksToCollideWith);
+            RaycastHit2D rayCast = Physics2D.Raycast(rayCastOrigin, Helper.GetVectorFromAngle(-(_rayAngle * (i))), _currentRayLength, _masksToCollideWith);
 
             if (rayCast.collider == null)
-                _vertices[i + 1] = _meshDrawOrigin + Helper.GetVectorFromAngle(-(_rayAngle * (i))) * _rayLength;
+                _vertices[i + 1] = _meshDrawOrigin + Helper.GetVectorFromAngle(-(_rayAngle * (i))) * _currentRayLength;
             else
                  _vertices[i + 1] = rayCast.point - rayCastOrigin;
 
@@ -100,14 +100,16 @@ public class FieldView : MonoBehaviour
         _mesh.triangles = _triangles;
     }
 
-    public void Enlarge()
+    public void Enlarge(float limit)
     {
-        if (_rayLength < _originalRayLength) _rayLength += enlargeSpeed - (_rayLength * speedOffset);
+        if (_currentRayLength < limit) 
+            _currentRayLength += _enlargeSpeed - (_currentRayLength * _speedOffset);
     }
 
     public void Shrink()
     {
-        if (_rayLength > 0) _rayLength -= shrinkSpeed;
+        if (_currentRayLength > 0) 
+            _currentRayLength -= _shrinkSpeed;
     }
 
 }

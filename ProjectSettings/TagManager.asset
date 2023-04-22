@@ -7,6 +7,7 @@ TagManager:
   - Tile Fade Sensor
   - Player Vision Sensor
   - Tile Sensor
+  - Tile
   layers:
   - Default
   - TransparentFX
@@ -18,15 +19,15 @@ TagManager:
   - 
   - 
   - Wall
-  - Ground
+  - Floor
   - 
   - 
-  - Darkness
+  - Fog
+  - Heat Signature
   - 
   - 
   - 
-  - 
-  - 
+  - Darkness View
   - Field View
   - Power View
   - Player

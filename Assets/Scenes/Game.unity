@@ -123,23 +123,17 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &422595865 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 936668498896391612, guid: c8c61c39afd1a0d479bd2257edaffd3b, type: 3}
-  m_PrefabInstance: {fileID: 1124112016}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &422595873 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 936668498896391606, guid: c8c61c39afd1a0d479bd2257edaffd3b, type: 3}
   m_PrefabInstance: {fileID: 1124112016}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &422595880
+--- !u!114 &422595880 stripped
 MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 422595880, guid: c8c61c39afd1a0d479bd2257edaffd3b, type: 3}
+  m_PrefabInstance: {fileID: 1124112016}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 422595865}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 48b6f65ae2bc9f6499853c73e0367838, type: 3}
@@ -438,6 +432,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 173399a3051ff6742a739ba2db4b5762, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _playerPrefab: {fileID: 0}
+  _viewsManagerPrefab: {fileID: 0}
+  _dungeonManagerPrefab: {fileID: 0}
 --- !u!4 &623558953
 Transform:
   m_ObjectHideFlags: 0
@@ -446,7 +443,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 623558951}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.82182527, y: 14.154733, z: 0.15427493}
+  m_LocalPosition: {x: 0, y: 0, z: 0.15427493}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -555,18 +552,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 311663192358725651, guid: c8c61c39afd1a0d479bd2257edaffd3b, type: 3}
-      propertyPath: m_Radius
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 936668498896391599, guid: c8c61c39afd1a0d479bd2257edaffd3b, type: 3}
-      propertyPath: m_SortingOrder
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 936668498896391604, guid: c8c61c39afd1a0d479bd2257edaffd3b, type: 3}
-      propertyPath: m_Radius
-      value: 2.5
-      objectReference: {fileID: 0}
     - target: {fileID: 936668498896391606, guid: c8c61c39afd1a0d479bd2257edaffd3b, type: 3}
       propertyPath: m_RootOrder
       value: 1
@@ -615,56 +600,7 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
-    - target: {fileID: 936668498896391612, guid: c8c61c39afd1a0d479bd2257edaffd3b, type: 3}
-      propertyPath: m_Layer
-      value: 21
-      objectReference: {fileID: 0}
-    - target: {fileID: 3378505585554901724, guid: c8c61c39afd1a0d479bd2257edaffd3b, type: 3}
-      propertyPath: m_Name
-      value: Wall Sensor
-      objectReference: {fileID: 0}
-    - target: {fileID: 3900692728841198157, guid: c8c61c39afd1a0d479bd2257edaffd3b, type: 3}
-      propertyPath: m_Name
-      value: PowerView
-      objectReference: {fileID: 0}
-    - target: {fileID: 3900692728841198157, guid: c8c61c39afd1a0d479bd2257edaffd3b, type: 3}
-      propertyPath: m_Layer
-      value: 20
-      objectReference: {fileID: 0}
-    - target: {fileID: 5621480624011007573, guid: c8c61c39afd1a0d479bd2257edaffd3b, type: 3}
-      propertyPath: m_RootOrder
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5621480624011007573, guid: c8c61c39afd1a0d479bd2257edaffd3b, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5621480624011007573, guid: c8c61c39afd1a0d479bd2257edaffd3b, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5621480624011007573, guid: c8c61c39afd1a0d479bd2257edaffd3b, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5621480624011007573, guid: c8c61c39afd1a0d479bd2257edaffd3b, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -0.2
-      objectReference: {fileID: 0}
-    - target: {fileID: 5973153023511556901, guid: c8c61c39afd1a0d479bd2257edaffd3b, type: 3}
-      propertyPath: m_Radius
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 5973153023511556901, guid: c8c61c39afd1a0d479bd2257edaffd3b, type: 3}
-      propertyPath: m_Offset.y
-      value: -0.2
-      objectReference: {fileID: 0}
-    - target: {fileID: 8681938944725337380, guid: c8c61c39afd1a0d479bd2257edaffd3b, type: 3}
-      propertyPath: m_RootOrder
-      value: 1
-      objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 936668498896391604, guid: c8c61c39afd1a0d479bd2257edaffd3b, type: 3}
+    m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c8c61c39afd1a0d479bd2257edaffd3b, type: 3}
 --- !u!1 &1345570126
 GameObject:
@@ -767,9 +703,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enlargeKey: 101
-  _playerObject: {fileID: 422595865}
+  _playerObject: {fileID: 422595880}
   _fieldViewPrefab: {fileID: 6534645512893649907, guid: c435274547b4b574abb34f38c7926c06, type: 3}
-  _powerViewPrefab: {fileID: 2937049472028911468, guid: 64dd88f22fbf8dc4184d4bd709112f56, type: 3}
+  _powerViewPrefab: {fileID: -5269223095036983320, guid: 64dd88f22fbf8dc4184d4bd709112f56, type: 3}
   _fieldViewMaskToCollideWith:
     serializedVersion: 2
     m_Bits: 512
@@ -835,11 +771,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5f300c733bd881649b6df46c66fe6c64, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridSize: 0
-  Player: {fileID: 422595865}
-  wallPrefab: {fileID: 3952215441001453946, guid: 82cd67c5de7f0fb4bb0f07c1dd789c96, type: 3}
-  floorPrefab: {fileID: 5848866807638792365, guid: 961cb9760697857438931fdd510bfe7b, type: 3}
-  doorPrefab: {fileID: 2431205967455557554, guid: 04098af9275173044adde99fc86c1449, type: 3}
+  _size: 0
+  _tilePrefab: {fileID: 1312911340276563076, guid: 30ddd1074b2d2c64fb9d369b7d7dd0f0, type: 3}
+  _player: {fileID: 422595880}
+  _doorSprite: {fileID: 1197642048, guid: 7f007364a6c726d448dbf9ad423bbdc9, type: 3}
+  _wallSprite: {fileID: -335989157, guid: 7f007364a6c726d448dbf9ad423bbdc9, type: 3}
+  _floorSprite: {fileID: 248849026, guid: 7f007364a6c726d448dbf9ad423bbdc9, type: 3}
 --- !u!1 &2010204408
 GameObject:
   m_ObjectHideFlags: 0

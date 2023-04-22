@@ -11,54 +11,56 @@ public class ViewsManager : MonoBehaviour
 
     // ----------------- properties
 
-    [SerializeField] private GameObject _playerObject;
-    [SerializeField] private FieldView _fieldViewPrefab;
-    [SerializeField] private PowerView _powerViewPrefab;
-
+    [SerializeField] private Player _playerObject;
+    [SerializeField] private MeshField _fieldViewPrefab;
+    [SerializeField] private MeshField _powerViewPrefab;
 
     [SerializeField] private LayerMask _fieldViewMaskToCollideWith;
     [SerializeField] private LayerMask _powerViewMaskToCollideWith;
 
-    private FieldView _fieldViewObject;
-    private PowerView _powerViewObject;
+    private MeshField _fieldView;
+    private MeshField _powerView;
 
     void Start()
     {
-        _fieldViewObject = Instantiate(_fieldViewPrefab);
-        _powerViewObject = Instantiate(_powerViewPrefab);
+        _fieldView = Instantiate(_fieldViewPrefab);
+        _powerView = Instantiate(_powerViewPrefab);
 
-        _fieldViewObject.name = "Field View";
-        _powerViewObject.name = "Power View";
+        _fieldView.name = "Field View";
+        _powerView.name = "Power View";
 
-        _fieldViewObject.transform.SetParent(transform);
-        _powerViewObject.transform.SetParent(transform);
+        _fieldView.transform.SetParent(transform);
+        _powerView.transform.SetParent(transform);
 
-        _powerViewObject.Init(_playerObject, _powerViewMaskToCollideWith);
-        _fieldViewObject.Init(_playerObject, _fieldViewMaskToCollideWith);
+        _powerView.Init(_playerObject, _powerViewMaskToCollideWith);
+        _fieldView.Init(_playerObject, _fieldViewMaskToCollideWith);
     }
 
     void Update()
     {
         if (Input.GetKey(enlargeKey))
         {
-            if (_fieldViewObject.RayLength > 0)
+            _playerObject.TurnOnPowerView();
+
+            if (_fieldView.RayLength > 0)
             {
-                _fieldViewObject.Shrink();
+                _fieldView.Shrink();
             }
             else
             {
-                _powerViewObject.Enlarge();
+                _powerView.Enlarge(10);
             }
         }
         else
         {
-            if (_powerViewObject.RayLength > 0)
+            if (_powerView.RayLength > 0)
             {
-                _powerViewObject.Shrink();
+                _powerView.Shrink();
             }
             else
             {
-                _fieldViewObject.Enlarge();
+                _playerObject.TurnOffPowerView();
+                _fieldView.Enlarge(_fieldView.OriginalRayLength);
             }
         }
     }

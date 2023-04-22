@@ -96,8 +96,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6166c50e2921e1540978a5a3c3952a47, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  wallLayerMask:
-    serializedVersion: 2
-    m_Bits: 70400
-  Player: {fileID: 0}
-  rayLength: 3.5
+  _originalRayLength: 3.5
+  _enlargeSpeed: 0.025
+  _shrinkSpeed: 0.05
+  _speedOffset: 0.01

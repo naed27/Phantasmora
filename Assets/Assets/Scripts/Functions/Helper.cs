@@ -51,7 +51,7 @@ public class Helper
     public static bool GenerateRandomBool() { return UnityEngine.Random.Range(0, 2) != 0; }
 
 
-    public static Cell[] FilterArray(Cell[] array, Func<Cell, bool> condition)
+    public static Tile[] FilterArray(Tile[] array, Func<Tile, bool> condition)
     {
         return array.Where(x => condition(x)).ToArray();
     }
@@ -85,7 +85,6 @@ public class Helper
         for (int i = 0; i < array.Length; i++)
             if (array[i].Equals(element))
                 return true;
-
         return false;
     }
 

@@ -12,8 +12,8 @@ GameObject:
   - component: {fileID: 2937049472028911470}
   - component: {fileID: 2937049472028911471}
   - component: {fileID: -5269223095036983320}
-  m_Layer: 20
-  m_Name: PowerView
+  m_Layer: 18
+  m_Name: DarknessView
   m_TagString: Player Vision Sensor
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -62,7 +62,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 5338d687a90dc0940a78b501e1f23e2c, type: 2}
+  - {fileID: 2100000, guid: 4e8ebce6d42850545b21762de5066389, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -98,5 +98,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _originalRayLength: 0
   _enlargeSpeed: 0.1
-  _shrinkSpeed: 0.1
+  _shrinkSpeed: 0.15
   _speedOffset: 0.01

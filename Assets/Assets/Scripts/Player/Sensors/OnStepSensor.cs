@@ -2,11 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GroundSensor : MonoBehaviour
+public class OnStepSensor : MonoBehaviour
 {
 
 
-    private void OnTriggerExit2D(Collider2D collisionTarget)
+    private void OnTriggerEnter2D(Collider2D collisionTarget)
     {
         GameObject hitObject = collisionTarget.gameObject;
         if (hitObject.layer == LayerMask.NameToLayer("Floor"))

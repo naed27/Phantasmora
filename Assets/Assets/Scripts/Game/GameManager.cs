@@ -4,7 +4,18 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    // Start is called before the first frame update
+    // ---------------- Global Prefabs
+
+    [SerializeField] private Player _playerPrefab;
+    [SerializeField] private ViewsManager _viewsManagerPrefab;
+    [SerializeField] private DungeonManager _dungeonManagerPrefab;
+
+    // ---------------- Global Objects
+
+    private Player _player;
+    private ViewsManager _viewsManager;
+    private DungeonManager _dungeonManager;
+
     void Start()
     {
         
