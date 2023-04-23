@@ -10,9 +10,10 @@ public class MeshField : MonoBehaviour
     // ------------------ modifier properties
 
     [SerializeField] private float _originalRayLength = 0f;
-    [SerializeField] private float _enlargeSpeed = 0.025f;
-    [SerializeField] private float _shrinkSpeed = 0.05f;
-    [SerializeField] private float _speedOffset = 0.01f;
+    [SerializeField] private float _maximumRayLength = 0f;
+    [SerializeField] private float _shrinkSpeed = 2f;
+    [SerializeField] private float _enlargeSpeed = 2f;
+
 
     // ------------------ mesh properties
 
@@ -33,7 +34,7 @@ public class MeshField : MonoBehaviour
     // ---------------- setters and getters
 
     public float RayLength { get { return _currentRayLength; } }
-
+    public float MaximumRayLength { get { return _maximumRayLength; } }
     public float OriginalRayLength { get { return _originalRayLength; } }
 
     public void Init(Player player, LayerMask maskToCollideWith)
@@ -56,6 +57,7 @@ public class MeshField : MonoBehaviour
         _vertices = new Vector3[_rayCount + 2];
         _triangles = new int[_rayCount * 3];
         _vertices[0] = _meshDrawOrigin;
+
     }
 
     void Update()
@@ -103,13 +105,13 @@ public class MeshField : MonoBehaviour
     public void Enlarge(float limit)
     {
         if (_currentRayLength < limit) 
-            _currentRayLength += _enlargeSpeed - (_currentRayLength * _speedOffset);
+            _currentRayLength += (_enlargeSpeed - _currentRayLength) * Time.fixedDeltaTime;
     }
 
     public void Shrink()
     {
         if (_currentRayLength > 0) 
-            _currentRayLength -= _shrinkSpeed;
+            _currentRayLength -= (_shrinkSpeed) * Time.fixedDeltaTime;
     }
 
 }

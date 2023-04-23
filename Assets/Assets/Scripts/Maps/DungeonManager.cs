@@ -8,27 +8,33 @@ public class DungeonManager : MonoBehaviour
 
     [SerializeField] private int _size;
 
-    [SerializeField] private Tile _tilePrefab;
     [SerializeField] private Player _player;
+    [SerializeField] private Tile _tilePrefab;
+    [SerializeField] private Guard _guardPrefab;
 
     [SerializeField] private Sprite _doorSprite;
     [SerializeField] private Sprite _wallSprite;
     [SerializeField] private Sprite _floorSprite;
 
-    private Tile[,] _grid;
+    [SerializeField] private Material _wallMaterial;
+    [SerializeField] private Material _floorMaterial;
 
-    public Tile[,] Grid { get { return _grid; } }
+    private Tile[,] _grid;
 
     private int _rowCount;
     private int _colCount;
 
-    private Tile _endPoint;
+    private Tile _goalPoint;
+    private Guard[] _guards;
     private Walker[] _walkers;
+    private List<Tile> _floorTiles;
 
     readonly private int _cellSize = 2;
     readonly private int _walkerCount = 2;
 
     // ------------ Setters and Getters
+
+    public Tile[,] Grid { get { return _grid; } }
 
     public Player Player { get { return _player; } }
 
@@ -42,6 +48,7 @@ public class DungeonManager : MonoBehaviour
         this.ActivateWalkers();
         this.ExpandEndPoint();
         this.DrawMaze();
+        this.SpawnGuards();
     }
 
     private void SetupMazeCells()
@@ -51,7 +58,8 @@ public class DungeonManager : MonoBehaviour
         if (this._size > 50) this._size = 50;
         this._rowCount = this._size;
         this._colCount = this._size;
-        
+        _floorTiles = new List<Tile>();
+
         // Make empty grid array
         this._grid = new Tile[this._rowCount, this._colCount];
 
@@ -92,12 +100,15 @@ public class DungeonManager : MonoBehaviour
 
                 Vector3 spawnPosition = new(xBase + (x * _cellSize), yBase - (y * _cellSize), 0);
 
-                if (tile.IsWall() || tile.IsEdge())
-                    tile.DrawTile(_wallSprite, spawnPosition, "wall");
+                if (tile.IsWall() || tile.IsEdge() || tile.IsNull())
+                    tile.DrawTile(_wallSprite, _wallMaterial, spawnPosition, "wall");
                 else if (tile.IsFloor() || tile.IsSpawnPoint())
-                    tile.DrawTile(_floorSprite, spawnPosition, "floor");
+                {
+                    tile.DrawTile(_floorSprite, _floorMaterial, spawnPosition, "floor");
+                    _floorTiles.Add(tile);
+                }
                 else if (tile.IsGoalPoint())
-                    tile.DrawTile(_doorSprite, spawnPosition, "wall");
+                    tile.DrawTile(_doorSprite, _floorMaterial, spawnPosition, "wall");
 
                 if (tile.IsSpawnPoint())
                     this._player.transform.position = spawnPosition;
@@ -119,6 +130,30 @@ public class DungeonManager : MonoBehaviour
         this._walkers = walkers;
     }
 
+    private void SpawnGuards()
+    {
+        Guard[] guards = new Guard[6];
+
+        (int x, int y) = _goalPoint.GridCoordinates;
+
+        List<Tile> guardTiles = Helper.FilterList(
+            _floorTiles,
+            tile => 
+                Helper.AreNumbersXDistanceApart(tile.GridCoordinates.X, x, _size / 2)
+            ||  Helper.AreNumbersXDistanceApart(tile.GridCoordinates.Y, y, _size / 2)
+        );
+
+
+        for (int i = 0; i < guards.Length; i++)
+        {
+            guards[i] = Instantiate(_guardPrefab);
+            Tile tile = guardTiles[Helper.GenerateRandomNumber(0, guardTiles.Count - 1)];
+            guards[i].Init(tile, this);
+        }
+
+        _guards = guards;
+    }
+
     private void DetermineEndPoint()
     {
 
@@ -132,8 +167,8 @@ public class DungeonManager : MonoBehaviour
             n2 = temp;
         }
 
-        this._endPoint = this._grid[n1, n2];
-        this._endPoint.Type = "goal";
+        this._goalPoint = this._grid[n1, n2];
+        this._goalPoint.Type = "goal";
     }
 
     private void ActivateWalkers()
@@ -165,7 +200,7 @@ public class DungeonManager : MonoBehaviour
 
     private void ExpandEndPoint()
     {
-        (int x, int y) = this._endPoint.GridCoordinates;
+        (int x, int y) = this._goalPoint.GridCoordinates;
 
         if (y == 0 || y == this._colCount - 1) this.ForceFloor(x + 0, y - 1, true);
         if (y == 0 || y == this._colCount - 1) this.ForceFloor(x + 0, y + 1, true);

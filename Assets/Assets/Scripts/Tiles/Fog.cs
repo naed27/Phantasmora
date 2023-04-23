@@ -13,7 +13,7 @@ public class Fog : MonoBehaviour
     private bool _isFloor = false;
 
     readonly private float _lowestFogIntensity = 0f; //     <----- 0% foggy
-    readonly private float _highestFogIntensity = 0.80f; //  <---- 80% foggy
+    readonly private float _highestFogIntensity = 1f; //  <---- 100% foggy
 
     public void Init(Player player)
     {
@@ -44,7 +44,7 @@ public class Fog : MonoBehaviour
     {
         GameObject hitObject = collisionTarget.gameObject;
         if (hitObject.CompareTag("Player"))
-            if (collisionTarget.gameObject.TryGetComponent(out Player player))
+            if (hitObject.TryGetComponent(out Player player))
                 if (_isWall && !player.IsUsingPowerView)
                     DoFadeIn();
     }

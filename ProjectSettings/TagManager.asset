@@ -8,6 +8,7 @@ TagManager:
   - Player Vision Sensor
   - Tile Sensor
   - Tile
+  - Guard
   layers:
   - Default
   - TransparentFX
@@ -23,19 +24,19 @@ TagManager:
   - 
   - 
   - Fog
-  - Heat Signature
-  - 
+  - Tile Heat
+  - Creature Heat
   - 
   - 
   - Darkness View
   - Field View
   - Power View
+  - 
+  - 
+  - 
+  - 
+  - Guard
   - Player
-  - 
-  - 
-  - 
-  - 
-  - 
   - 
   - 
   - 

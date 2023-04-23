@@ -97,6 +97,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _originalRayLength: 0
-  _enlargeSpeed: 0.1
-  _shrinkSpeed: 0.1
-  _speedOffset: 0.01
+  _maximumRayLength: 10
+  _shrinkSpeed: 6
+  _enlargeSpeed: 10

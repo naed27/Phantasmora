@@ -4,14 +4,10 @@ using UnityEngine;
 
 public class ViewsManager : MonoBehaviour
 {
-
-    // ----------------- control keys
-
-    [SerializeField] private KeyCode enlargeKey = KeyCode.E;
-
+  
     // ----------------- properties
 
-    [SerializeField] private Player _playerObject;
+    [SerializeField] private Player _player;
     [SerializeField] private MeshField _fieldViewPrefab;
     [SerializeField] private MeshField _powerViewPrefab;
 
@@ -20,6 +16,8 @@ public class ViewsManager : MonoBehaviour
 
     private MeshField _fieldView;
     private MeshField _powerView;
+
+    private bool _isUsingPowerView = false;
 
     void Start()
     {
@@ -32,15 +30,15 @@ public class ViewsManager : MonoBehaviour
         _fieldView.transform.SetParent(transform);
         _powerView.transform.SetParent(transform);
 
-        _powerView.Init(_playerObject, _powerViewMaskToCollideWith);
-        _fieldView.Init(_playerObject, _fieldViewMaskToCollideWith);
+        _powerView.Init(_player, _powerViewMaskToCollideWith);
+        _fieldView.Init(_player, _fieldViewMaskToCollideWith);
     }
 
     void Update()
     {
-        if (Input.GetKey(enlargeKey))
+        if (_isUsingPowerView)
         {
-            _playerObject.TurnOnPowerView();
+            _player.TurnOnPowerView();
 
             if (_fieldView.RayLength > 0)
             {
@@ -48,7 +46,9 @@ public class ViewsManager : MonoBehaviour
             }
             else
             {
-                _powerView.Enlarge(10);
+                _player.SlowDown();
+                _powerView.Enlarge(_powerView.MaximumRayLength);
+                _player.ConsumePowerDuration();
             }
         }
         else
@@ -59,9 +59,14 @@ public class ViewsManager : MonoBehaviour
             }
             else
             {
-                _playerObject.TurnOffPowerView();
+                _player.NormalizeSpeed();
+                _player.TurnOffPowerView();
                 _fieldView.Enlarge(_fieldView.OriginalRayLength);
+                _player.ReplenishPowerDuration();
             }
         }
     }
+
+    public void ActivatePowerView() { _isUsingPowerView = true; }
+    public void DeativatePowerView() { _isUsingPowerView = false; }
 }

@@ -7,10 +7,10 @@ using System;
 
 public class Helper
 {
-    public static int GenerateRandomNumber(int minValue, int maxValue)
-    {
-        return UnityEngine.Random.Range(minValue, maxValue + 1);
-    }
+
+    public static Color ConvertColor(float r, float g, float b, float a) => new(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f);
+
+    public static int GenerateRandomNumber(int minValue, int maxValue) => UnityEngine.Random.Range(minValue, maxValue + 1);
 
     public static int[] GenerateRandomNumbersRange(int rangeStart, int rangeEnd, int numberOfRandoms)
     {
@@ -95,6 +95,11 @@ public class Helper
 
         float angleRadius = angle * (Mathf.PI / 180f);
         return new Vector3(Mathf.Cos(angleRadius), Mathf.Sin(angleRadius));
+    }
+
+    public static bool AreNumbersXDistanceApart(float num1, float num2, float distance)
+    {
+        return Mathf.Abs(num1 - num2) >= Mathf.Abs(distance);
     }
 }
 

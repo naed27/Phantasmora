@@ -18,6 +18,10 @@ public class Tile : MonoBehaviour
     private List<Tile> _neighbors = new();
     private int _wallInstance = 0;
 
+    private Vector3 _position;
+
+    public Vector3 Position { get { return _position; } }
+
 
     // ----------------------- setters and getters
     public string Id { get { return _id; } set { _id = value; } }
@@ -30,6 +34,10 @@ public class Tile : MonoBehaviour
 
     public Coordinate GridCoordinates { get { return _gridCoordinates; } set { _gridCoordinates = value; } }
 
+
+    //------------
+
+   
 
     // ----------------------- functions
 
@@ -57,7 +65,7 @@ public class Tile : MonoBehaviour
 
     public bool IsWall() { return this._type == "wall"; }
 
-    public bool IsFloor() { return this._type == "floor"; }
+    public bool IsFloor() { return this._type == "floor" || this._type == "spawn"; }
 
     public bool IsNull() { return this._type == "null"; }
 
@@ -67,16 +75,24 @@ public class Tile : MonoBehaviour
 
     public bool IsSameCell(Tile tile) { return tile != null && this._id == tile.Id; }
 
-    public void DrawTile(Sprite sprite, Vector3 position, string layer)
+    public void DrawTile(Sprite sprite, Material material, Vector3 position, string layer)
     {
         SetLayer(layer);
-        SetSprite(sprite);
+        SetSpriteAndMaterial(sprite, material);
         SetPosition(position);
         CreateFog(position);
         CreateHeatSignature(position, sprite);
     }
 
+    // -------------
 
+    private void OnTriggerStay2D(Collider2D collisionTarget)
+    {
+        GameObject hitObject = collisionTarget.gameObject;
+        if (hitObject.CompareTag("Guard"))
+            if (hitObject.TryGetComponent(out Guard guard))
+                guard.SetNewGoalFrom(this);
+    }
 
     // ----------------------- private functions
 
@@ -106,13 +122,15 @@ public class Tile : MonoBehaviour
         _heatSignaturePrefab.Init(sprite);
     }
 
-    private void SetSprite(Sprite sprite)
+    private void SetSpriteAndMaterial(Sprite sprite, Material material)
     {
         SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
         spriteRenderer.sprite = sprite;
+        spriteRenderer.material = material;
     }
     private void SetPosition(Vector3 position)
     {
+        _position = position;
         transform.position = position;
     }
     private void SetLayer(string layer)
