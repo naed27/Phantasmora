@@ -4,11 +4,10 @@ using UnityEngine;
 
 public class Tile : MonoBehaviour
 {
-    [SerializeField] private Fog _fogPrefab;
-    [SerializeField] private HeatSignature _heatSignaturePrefab;
 
-    private Fog _fog;
-    private HeatSignature _heatSignature;
+    [SerializeField] private Fog _fog;
+    [SerializeField] private HeatSignature _heatSignature;
+    [SerializeField] private TileInteractive _tileInteractive;
 
     private string _id;
     private string _type;
@@ -44,12 +43,13 @@ public class Tile : MonoBehaviour
     public void Init(int x, int y, DungeonManager dungeonManager)
     {
         SetId(x, y);
-        SetCoordinates(x, y);
-        SetDungeonManager(dungeonManager);
-
         SetName();
-        SetParent(dungeonManager);
+        SetCoordinates(x, y);
+        SetParent(dungeonManager); 
+        _dungeonManager = dungeonManager;
+        _tileInteractive.Init(this, dungeonManager.Player, dungeonManager.Player.InteractKey);
     }
+
 
     public void DetermineNeighbors()
     {
@@ -80,10 +80,9 @@ public class Tile : MonoBehaviour
         SetLayer(layer);
         SetSpriteAndMaterial(sprite, material);
         SetPosition(position);
-        CreateFog(position);
-        CreateHeatSignature(position, sprite);
+        _fog.Init(_dungeonManager.Player);
+        _heatSignature.Init(sprite);
     }
-
     // -------------
 
     private void OnTriggerStay2D(Collider2D collisionTarget)
@@ -94,33 +93,15 @@ public class Tile : MonoBehaviour
                 guard.SetNewGoalFrom(this);
     }
 
+
     // ----------------------- private functions
 
 
     private void SetId(int x, int y) { _id = "(" + x.ToString() + ", " + y.ToString() + ")"; }
     private void SetCoordinates(int x, int y) { _gridCoordinates = new Coordinate(x, y); }
-    private void SetDungeonManager(DungeonManager dungeonManager) { _dungeonManager = dungeonManager; }
     private void SetName() { transform.gameObject.name = "Tile" + Id; }
     private void SetParent(DungeonManager dungeonManager) { transform.parent = dungeonManager.transform; }
 
-
-    private void CreateFog(Vector3 position)
-    {
-        _fog = Instantiate(_fogPrefab);
-        _fog.name = "Fog";
-        _fog.transform.parent = transform;
-        _fog.transform.position = position;
-        _fog.Init(_dungeonManager.Player);
-    }
-
-    private void CreateHeatSignature(Vector3 position, Sprite sprite)
-    {
-        _heatSignaturePrefab = Instantiate(_heatSignaturePrefab);
-        _heatSignaturePrefab.name = "Heat Signature";
-        _heatSignaturePrefab.transform.parent = transform;
-        _heatSignaturePrefab.transform.position = position;
-        _heatSignaturePrefab.Init(sprite);
-    }
 
     private void SetSpriteAndMaterial(Sprite sprite, Material material)
     {

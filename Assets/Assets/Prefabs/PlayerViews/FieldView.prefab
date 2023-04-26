@@ -98,5 +98,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _originalRayLength: 4
   _maximumRayLength: 4
-  _shrinkSpeed: 4
+  _shrinkSpeed: 2
   _enlargeSpeed: 4

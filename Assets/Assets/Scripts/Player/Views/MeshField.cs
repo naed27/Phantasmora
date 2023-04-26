@@ -18,7 +18,7 @@ public class MeshField : MonoBehaviour
     // ------------------ mesh properties
 
     private Mesh _mesh;
-    private Player _playerObject;
+    private Player _player;
     private LayerMask _masksToCollideWith;
 
     private float _currentRayLength;
@@ -40,7 +40,7 @@ public class MeshField : MonoBehaviour
     public void Init(Player player, LayerMask maskToCollideWith)
     {
         // Setup Properties
-        _playerObject = player;
+        _player = player;
         _masksToCollideWith = maskToCollideWith;
 
         // Create a new mesh
@@ -69,9 +69,8 @@ public class MeshField : MonoBehaviour
 
     private void UpdateMeshPosition()
     {
-        Vector3 currentPosition = _playerObject.transform.position;
+        Vector3 currentPosition = _player.transform.position;
         currentPosition.z = -1;
-        currentPosition.y -= 0.22f;
         transform.position = currentPosition;
     }
 

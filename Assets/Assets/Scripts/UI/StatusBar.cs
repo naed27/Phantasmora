@@ -8,6 +8,7 @@ public class StatusBar : MonoBehaviour
 
     [SerializeField] private Slider _slider;
     [SerializeField] private GameObject _fill;
+    [SerializeField] private GameObject _lockText;
 
     public float Value { get { return _slider.value; } }
 
@@ -24,6 +25,10 @@ public class StatusBar : MonoBehaviour
     public bool IsEmpty() => _slider.value == 0;
     public bool IsFull() => _slider.value == _slider.maxValue;
     public void SetColor(Color color) => _fill.GetComponent<Image>().color = color;
+
+    public void DisplayLock() => _lockText.SetActive(true);
+    public void HideLock() => _lockText.SetActive(false);
+
 
 
 

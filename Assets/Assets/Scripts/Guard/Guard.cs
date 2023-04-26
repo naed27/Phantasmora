@@ -6,6 +6,9 @@ public class Guard : MonoBehaviour
 {
     // Properties
     [SerializeField] private float _moveSpeed;
+    [SerializeField] private PlayerSensor _playerSensor;
+
+    private Player _player;
 
     private Vector2 _movement;
     private Animator _animator;
@@ -34,6 +37,7 @@ public class Guard : MonoBehaviour
 
         // Setup identifications
         _dungeonManager = dungeonManager;
+        _player = dungeonManager.Player;
 
         // Set Position
         transform.position = tile.Position;
@@ -45,11 +49,22 @@ public class Guard : MonoBehaviour
 
     private void Update()
     {
-        if (xTimer <= 0)
-            _movement.x = ComparePosition(transform.position.x, _goalTile.Position.x, "x");
-        if (yTimer <= 0)
-            _movement.y = ComparePosition(transform.position.y, _goalTile.Position.y, "y");
+        if (_playerSensor.PlayerIsClose)
+        {
+            if (xTimer <= 0)
+                _movement.x = ComparePosition(transform.position.x, _player.transform.position.x, "x");
+            if (yTimer <= 0)
+                _movement.y = ComparePosition(transform.position.y, _player.transform.position.y, "y");
+        }
+        else
+        {
+            if (xTimer <= 0)
+                _movement.x = ComparePosition(transform.position.x, _goalTile.Position.x, "x");
+            if (yTimer <= 0)
+                _movement.y = ComparePosition(transform.position.y, _goalTile.Position.y, "y");
+        }
 
+        
         _animator.SetFloat("Speed", _movement.sqrMagnitude);
 
         if (_movement.x != 0)
@@ -65,7 +80,8 @@ public class Guard : MonoBehaviour
 
     void FixedUpdate()
     {
-        _rigidBody2D.MovePosition(_rigidBody2D.position + _moveSpeed * Time.fixedDeltaTime * _movement.normalized);
+        float moveSpeed = (_playerSensor.PlayerIsClose) ? _moveSpeed * 4 : _moveSpeed;
+        _rigidBody2D.MovePosition(_rigidBody2D.position + moveSpeed * Time.fixedDeltaTime * _movement.normalized);
     }
 
     private void OnTriggerStay2D(Collider2D collisionTarget)

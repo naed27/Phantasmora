@@ -42,31 +42,35 @@ public class ViewsManager : MonoBehaviour
 
             if (_fieldView.RayLength > 0)
             {
+                _player.CastPower();
                 _fieldView.Shrink();
             }
             else
             {
+                _player.StopCasting();
                 _player.SlowDown();
+                _powerView.transform.localScale = Vector3.one;
                 _powerView.Enlarge(_powerView.MaximumRayLength);
                 _player.ConsumePowerDuration();
             }
         }
         else
         {
-            if (_powerView.RayLength > 0)
-            {
-                _powerView.Shrink();
-            }
-            else
+            if (_powerView.RayLength <= 0 )
             {
                 _player.NormalizeSpeed();
                 _player.TurnOffPowerView();
                 _fieldView.Enlarge(_fieldView.OriginalRayLength);
                 _player.ReplenishPowerDuration();
+                _powerView.transform.localScale = Vector3.zero;
+            }
+            else
+            {
+                _powerView.Shrink();
             }
         }
     }
 
-    public void ActivatePowerView() { _isUsingPowerView = true; }
-    public void DeativatePowerView() { _isUsingPowerView = false; }
+    public void ActivatePowerView() { if(_powerViewPrefab != null && _player.IsStatusBarVisible()) _isUsingPowerView = true; }
+    public void DeativatePowerView() { if(_isUsingPowerView != false) _isUsingPowerView = false; }
 }

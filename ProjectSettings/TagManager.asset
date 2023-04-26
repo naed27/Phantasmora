@@ -9,6 +9,7 @@ TagManager:
   - Tile Sensor
   - Tile
   - Guard
+  - Danger Zone
   layers:
   - Default
   - TransparentFX
@@ -21,7 +22,7 @@ TagManager:
   - 
   - Wall
   - Floor
-  - 
+  - Object
   - 
   - Fog
   - Tile Heat

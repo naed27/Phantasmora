@@ -6,11 +6,21 @@ using UnityEngine;
 public class DungeonManager : MonoBehaviour
 {
 
+    // ---------------- UI
+
+    [SerializeField] private GameObject _mainMenu;
+
+
+    //---------------- Properties
+
     [SerializeField] private int _size;
+    [SerializeField] private int _guardCount;
+    [SerializeField] private int _dungeonKeyCount;
 
     [SerializeField] private Player _player;
     [SerializeField] private Tile _tilePrefab;
     [SerializeField] private Guard _guardPrefab;
+    [SerializeField] private DungeonKey _dungeonKeyPrefab;
 
     [SerializeField] private Sprite _doorSprite;
     [SerializeField] private Sprite _wallSprite;
@@ -18,16 +28,21 @@ public class DungeonManager : MonoBehaviour
 
     [SerializeField] private Material _wallMaterial;
     [SerializeField] private Material _floorMaterial;
+    [SerializeField] private Material _doorMaterial;
 
-    private Tile[,] _grid;
+    private Tile[,] _grid = new Tile[0, 0];
 
     private int _rowCount;
     private int _colCount;
 
     private Tile _goalPoint;
-    private Guard[] _guards;
-    private Walker[] _walkers;
+
+    private List<Guard> _guards = new();
+    private List<Walker> _walkers = new();
+    private List<DungeonKey> _dungeonKeys = new ();
+
     private List<Tile> _floorTiles;
+    private List<Tile> _spawnableTiles;
 
     readonly private int _cellSize = 2;
     readonly private int _walkerCount = 2;
@@ -37,63 +52,73 @@ public class DungeonManager : MonoBehaviour
     public Tile[,] Grid { get { return _grid; } }
 
     public Player Player { get { return _player; } }
+    public List<DungeonKey> DungeonKeys => _dungeonKeys;
 
 
-    void Start()
+    public void Init()
     {
-        this.SetupMazeCells();
-        this.NetworkNeighbors();
-        this.DetermineEndPoint();
-        this.SpawnWalkers();
-        this.ActivateWalkers();
-        this.ExpandEndPoint();
-        this.DrawMaze();
-        this.SpawnGuards();
+        _mainMenu.SetActive(false);
+        _player.Init();
+
+        DestroyDungeon();
+
+        SetupMazeCells();
+        NetworkNeighbors();
+        DetermineEndPoint();
+        SpawnWalkers();
+        ActivateWalkers();
+        ExpandEndPoint();
+        DrawMaze();
+        InitializeSpawnableTiles();
+        SpawnGuards();
+        SpawnDungeonKeys();
+
+        _player.ShowStatusBar();
     }
 
     private void SetupMazeCells()
     {
         // Setup values for properties
-        if (this._size < 20) this._size = 20;
-        if (this._size > 50) this._size = 50;
-        this._rowCount = this._size;
-        this._colCount = this._size;
-        _floorTiles = new List<Tile>();
+        if (_size < 20) _size = 20;
+        if (_size > 50) _size = 50;
+        _rowCount = _size;
+        _colCount = _size;
 
-        // Make empty grid array
-        this._grid = new Tile[this._rowCount, this._colCount];
+        _grid = new Tile[_rowCount, _colCount];
 
         // Fill the grid array
-        for (int x = 0; x < this._rowCount; x++)
-            for (int y = 0; y < this._colCount; y++)
+        for (int x = 0; x < _rowCount; x++)
+            for (int y = 0; y < _colCount; y++)
             {
                 Tile tile = Instantiate(_tilePrefab);
                 tile.Init(x,y,this);
-                if(Helper.IsEdgeOfGrid(x,y, this._rowCount, this._colCount))
+                if(Helper.IsEdgeOfGrid(x,y, _rowCount, _colCount))
                     tile.Type = "edge";
                 else
                     tile.Type = "null";
-                this._grid[x, y] = tile;
+                _grid[x, y] = tile;
             }
 
     }
     private void NetworkNeighbors()
     {
-        for (int x = 0; x < this._rowCount; x++)
-            for (int y = 0; y < this._colCount; y++)
-                this._grid[x, y].DetermineNeighbors();
+        for (int x = 0; x < _rowCount; x++)
+            for (int y = 0; y < _colCount; y++)
+                _grid[x, y].DetermineNeighbors();
     }
 
     private void DrawMaze()
     {
 
-        Gizmos.color = Color.yellow;
-        float xBase = -(this._rowCount) + (_cellSize / 2);
-        float yBase = (this._colCount) - (_cellSize / 2);
+        _floorTiles = new List<Tile>();
 
-        for (int y = 0; y < this._colCount; y++)
+        Gizmos.color = Color.yellow;
+        float xBase = -(_rowCount) + (_cellSize / 2);
+        float yBase = (_colCount) - (_cellSize / 2);
+
+        for (int y = 0; y < _colCount; y++)
         {
-            for (int x = 0; x < this._rowCount; x++)
+            for (int x = 0; x < _rowCount; x++)
             {
 
                 Tile tile = _grid[x, y];
@@ -108,10 +133,10 @@ public class DungeonManager : MonoBehaviour
                     _floorTiles.Add(tile);
                 }
                 else if (tile.IsGoalPoint())
-                    tile.DrawTile(_doorSprite, _floorMaterial, spawnPosition, "wall");
+                    tile.DrawTile(_doorSprite, _doorMaterial, spawnPosition, "wall");
 
                 if (tile.IsSpawnPoint())
-                    this._player.transform.position = spawnPosition;
+                    _player.transform.position = spawnPosition;
             }
         }
 
@@ -119,46 +144,60 @@ public class DungeonManager : MonoBehaviour
 
     private void SpawnWalkers()
     {
-        Walker[] walkers = new Walker[this._walkerCount];
+        _walkers = new List<Walker>();
 
-        int[] x = Helper.GenerateRandomNumbersRange(1, this._rowCount - 2, this._walkerCount);
-        int[] y = Helper.GenerateRandomNumbersRange(1, this._colCount - 2, this._walkerCount);
+        int[] x = Helper.GenerateRandomNumbersRange(1, _rowCount - 2, _walkerCount);
+        int[] y = Helper.GenerateRandomNumbersRange(1, _colCount - 2, _walkerCount);
 
-        for (int i = 0; i < this._walkerCount; i++)
-            walkers[i] = new Walker(this._grid[x[i], y[i]], this);
+        for (int i = 0; i < _walkerCount; i++)
+            _walkers.Add(new Walker(_grid[x[i], y[i]], this));
 
-        this._walkers = walkers;
+    }
+
+    private void InitializeSpawnableTiles()
+    {
+        _spawnableTiles = new List<Tile>();
+
+        (int x, int y) = _goalPoint.GridCoordinates;
+        _spawnableTiles = Helper.FilterList(
+            _floorTiles,
+            tile =>
+                Helper.AreNumbersXDistanceApart(tile.GridCoordinates.X, x, _size / 2)
+            || Helper.AreNumbersXDistanceApart(tile.GridCoordinates.Y, y, _size / 2)
+        );
     }
 
     private void SpawnGuards()
     {
-        Guard[] guards = new Guard[6];
+        _guards = new List<Guard>();
 
-        (int x, int y) = _goalPoint.GridCoordinates;
-
-        List<Tile> guardTiles = Helper.FilterList(
-            _floorTiles,
-            tile => 
-                Helper.AreNumbersXDistanceApart(tile.GridCoordinates.X, x, _size / 2)
-            ||  Helper.AreNumbersXDistanceApart(tile.GridCoordinates.Y, y, _size / 2)
-        );
-
-
-        for (int i = 0; i < guards.Length; i++)
+        for (int i = 0; i < _guardCount; i++)
         {
-            guards[i] = Instantiate(_guardPrefab);
-            Tile tile = guardTiles[Helper.GenerateRandomNumber(0, guardTiles.Count - 1)];
-            guards[i].Init(tile, this);
+            Tile tile = _spawnableTiles[Helper.GenerateRandomNumber(0, _spawnableTiles.Count - 1)];
+            _guards.Add(Instantiate(_guardPrefab));
+            _guards[i].Init(tile, this);
         }
-
-        _guards = guards;
     }
+
+    private void SpawnDungeonKeys()
+    {
+        _dungeonKeys = new List<DungeonKey>();
+
+        for (int i = 0; i < _dungeonKeyCount; i++)
+        {
+            Tile tile = _spawnableTiles[Helper.GenerateRandomNumber(0, _spawnableTiles.Count - 1)];
+            _dungeonKeys.Add(Instantiate(_dungeonKeyPrefab));
+            _dungeonKeys[i].Init(i,tile, this);
+        }
+    }
+
+
 
     private void DetermineEndPoint()
     {
 
-        int n1 = Helper.GenerateRandomNumberEither(0, this._rowCount - 1);
-        int n2 = Helper.GenerateRandomNumber(1, this._rowCount - 2);
+        int n1 = Helper.GenerateRandomNumberEither(0, _rowCount - 1);
+        int n2 = Helper.GenerateRandomNumber(1, _rowCount - 2);
 
         if (Helper.GenerateRandomBool())
         {
@@ -167,29 +206,29 @@ public class DungeonManager : MonoBehaviour
             n2 = temp;
         }
 
-        this._goalPoint = this._grid[n1, n2];
-        this._goalPoint.Type = "goal";
+        _goalPoint = _grid[n1, n2];
+        _goalPoint.Type = "goal";
     }
 
     private void ActivateWalkers()
     {
-        for (int i = 0; i < this._walkers.Length; i++)
-            this._walkers[i].Walk();
+        for (int i = 0; i < _walkers.Count; i++)
+            _walkers[i].Walk();
     }
 
 
     public bool IsWithinGrid(int x, int y)
     {
-        if(x > 0 && x < this._rowCount-1 && y > 0 && y < this._colCount-1)
+        if(x > 0 && x < _rowCount-1 && y > 0 && y < _colCount-1)
             return true;
         return false;
     }
 
     private void ForceFloor(int x, int y, bool isPlayerSpawnPoint = false)
     {
-        if(this.IsWithinGrid(x, y))
+        if(IsWithinGrid(x, y))
         {
-            Tile tile = this._grid[x, y];
+            Tile tile = _grid[x, y];
 
             if (isPlayerSpawnPoint)
                 tile.Type = "spawn";
@@ -200,16 +239,53 @@ public class DungeonManager : MonoBehaviour
 
     private void ExpandEndPoint()
     {
-        (int x, int y) = this._goalPoint.GridCoordinates;
+        (int x, int y) = _goalPoint.GridCoordinates;
 
-        if (y == 0 || y == this._colCount - 1) this.ForceFloor(x + 0, y - 1, true);
-        if (y == 0 || y == this._colCount - 1) this.ForceFloor(x + 0, y + 1, true);
-        if (x == 0 || x == this._rowCount - 1) this.ForceFloor(x + 1, y + 0, true);
-        if (x == 0 || x == this._rowCount - 1) this.ForceFloor(x - 1, y + 0, true);
-        this.ForceFloor(x - 1, y + 1);
-        this.ForceFloor(x + 1, y + 1);
-        this.ForceFloor(x + 1, y - 1);
-        this.ForceFloor(x - 1, y - 1);
+        if (y == 0 || y == _colCount - 1) ForceFloor(x + 0, y - 1, true);
+        if (y == 0 || y == _colCount - 1) ForceFloor(x + 0, y + 1, true);
+        if (x == 0 || x == _rowCount - 1) ForceFloor(x + 1, y + 0, true);
+        if (x == 0 || x == _rowCount - 1) ForceFloor(x - 1, y + 0, true);
+        ForceFloor(x - 1, y + 1);
+        ForceFloor(x + 1, y + 1);
+        ForceFloor(x + 1, y - 1);
+        ForceFloor(x - 1, y - 1);
     }
 
+    private void DestroyTiles()
+    {
+        for (int x = 0; x < _grid.GetLength(0); x++)
+        {
+            for (int y = 0; y < _grid.GetLength(1); y++)
+            {
+                if (_grid[x, y])
+                    Destroy(_grid[x, y].transform.gameObject);
+            }
+        }
+
+        _grid = new Tile[_rowCount, _colCount];
+    }
+
+    private void DestroyGuards()
+    {
+        for (int i = 0; i < _guards.Count; i++)
+            if (_guards[i])
+                Destroy(_guards[i].transform.gameObject);
+        _guards = new List<Guard>();
+    }
+
+
+    private void DestroyDungeonKeys()
+    {
+        for (int i = 0; i < _dungeonKeys.Count; i++)
+            if(_dungeonKeys[i])
+                Destroy(_dungeonKeys[i].transform.gameObject);
+        _dungeonKeys = new List<DungeonKey>();
+    }
+
+    public void DestroyDungeon()
+    {
+        DestroyGuards();
+        DestroyTiles();
+        DestroyDungeonKeys();
+    }
 }
