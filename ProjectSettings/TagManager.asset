@@ -10,6 +10,7 @@ TagManager:
   - Tile
   - Guard
   - Danger Zone
+  - Interactable
   layers:
   - Default
   - TransparentFX

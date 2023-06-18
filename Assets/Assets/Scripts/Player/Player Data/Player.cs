@@ -1,5 +1,6 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -8,10 +9,11 @@ public class Player : MonoBehaviour
     [SerializeField] private GameObject _gameResultMenu;
 
 
-    // --------------- Main Props
-    [SerializeField] private GameManager _gameManager;
+    // --------------- Manager Props
+    [SerializeField] private MenuManager _menuManager;
     [SerializeField] private ViewsManager _viewsManager;
-    [SerializeField] private GameObject _heat;
+    [SerializeField] private SoundManager _soundManager;
+    [SerializeField] private ControlsManager _controlsManager;
 
 
     // --------------- Movement
@@ -22,52 +24,76 @@ public class Player : MonoBehaviour
     private Animator _animator;
     private float _originalMoveSpeed;
 
-    // --------------- Actions
-    [SerializeField] private KeyCode _pauseKey = KeyCode.Escape;
-    [SerializeField] private KeyCode _interactKey = KeyCode.F;
-    [SerializeField] private KeyCode _powerViewKey = KeyCode.E;
+    // --------------- Keybinds
+    private KeyCode _pauseKey;
+    private KeyCode _interactKey;
+    private KeyCode _usePowerKey;
+    private KeyCode _toggleNextPowerKey;
 
     // --------------- Power Status
 
     [SerializeField] private StatusBar _powerDurationBar;
     [SerializeField] private float _powerDurationInSeconds = 10;
-    private bool _isUsingPowerView;
+    private bool _isUsingMeld;
+    private bool _isUsingClairvoyance;
+    private bool _isOnClairvoyanceView;
     private bool _isPowerAvailable;
     private List<DungeonKey> _visibleKeys;
 
     // --------------- Status
-
-
-
-
-    // --------------- Power Status
-
+    [SerializeField] private Alert _keyAlert;
+    [SerializeField] private GameObject _heat;
     [SerializeField] private KeyInventory _keyInventory;
+    [SerializeField] private GameObject _statusBarPowerName;
 
 
+    private TextMeshProUGUI _powerName;
+
+    // --------------- Properties
+    private string[] _powers = { "clairvoyance", "meld" };
+    private int _powerIndex = 0;
+    private SpriteRenderer _spriteRenderer;
+    private bool _firstStart = true;
+
+
+    // --------------- Presets
+    [SerializeField] private float _meldVisionRange = 2.5f;
 
     // --------------- Setters and Getters
-    public bool IsUsingPowerView => _isUsingPowerView;
+    public float MoveSpeed => _moveSpeed;
+    public float MeldVisionRange => _meldVisionRange;
+    public bool IsUsingMeld => _isUsingMeld;
+    public bool IsUsingClairvoyance => _isUsingClairvoyance;
     public bool IsPowerAvailable => _isPowerAvailable;
     public KeyCode InteractKey => _interactKey;
-    public KeyCode PowerViewKey => _powerViewKey;
+    public KeyCode UsePowerKey => _usePowerKey;
 
 
     // --------------- Main
 
     void Start()
     {
+        // ------- Setup 
+        _scaleX = transform.localScale.x;
         _rb = GetComponent<Rigidbody2D>();
         _animator = GetComponent<Animator>();
-        _scaleX = transform.localScale.x;
+        _spriteRenderer = transform.GetComponent<SpriteRenderer>();
+        _powerName = _statusBarPowerName.GetComponent<TextMeshProUGUI>();
+        _originalMoveSpeed = _moveSpeed;
+
+        SetupKeybinds();
+
+        // ------- Start
         Init();
     }
 
     void Update()
     {
-        ListenForMovement();
-        ListenForPowerKey();
+        ListenForSkill();
         ListenForPauseKey();
+        ListenForMovement();
+        ListenForToggleNextPower();
+        Unmeld();
     }
 
     void FixedUpdate()
@@ -79,26 +105,62 @@ public class Player : MonoBehaviour
     {
         GameObject hitObject = collisionTarget.gameObject;
         if (hitObject.CompareTag("Danger Zone"))
-            _gameManager.Gameover();
+        {
+            _menuManager.Gameover();
+            _soundManager.StopAllAudio();
+            _soundManager.PlayPrimarySound("death");
+        }
     }
 
 
     // --------------- Functions
 
+
     public void Init()
     {
-        _isUsingPowerView = false;
+        _powerIndex = 0;
         _isPowerAvailable = true;
-        _originalMoveSpeed = _moveSpeed;
+        _isUsingClairvoyance = false;
+        _moveSpeed = _originalMoveSpeed;
         _powerDurationBar.SetMaxValue(_powerDurationInSeconds);
         _visibleKeys = new List<DungeonKey>();
         _keyInventory.Init();
+        _viewsManager.Init();
+        _powerDurationBar.Init();
+        _keyAlert.Init(IfThereAreKeysNearby); 
+        UpdatePowerNameOnStatus();
+
+        if (_firstStart)
+        {
+            _firstStart = false;
+        }
+        else
+        {
+            _soundManager.StopAllAudio();
+        }
     }
 
-    public void TurnOnPowerView() { if (!_isUsingPowerView) _isUsingPowerView = true; }
-    public void TurnOffPowerView() { if (_isUsingPowerView) _isUsingPowerView = false; }
-    public void CastPower() => _animator.SetBool("IsCasting", true);
-    public void StopCasting() => _animator.SetBool("IsCasting", false);
+
+    public void SetupKeybinds()
+    {
+        _pauseKey = _controlsManager.Pause;
+        _interactKey = _controlsManager.Interact;
+        _usePowerKey = _controlsManager.UsePower;
+        _toggleNextPowerKey = _controlsManager.ToggleNextPower;
+    }
+
+    public void TurnOnMeld() { if (!_isUsingMeld) { TurnOffClairevoyance(); _isUsingMeld = true; _soundManager.PlaySecondarySound("meldEffect"); } }
+    public void TurnOffMeld() { if (_isUsingMeld) _isUsingMeld = false; }
+    public void SetClairvoyanceViewStatus(bool state) { 
+        if(_isOnClairvoyanceView != state) {
+            _isOnClairvoyanceView = state;
+            _soundManager.PlaySecondarySound("clairvoyanceEffect");
+        }
+    }
+    public void TurnOnClairvoyance() { if (!_isUsingClairvoyance) TurnOffMeld(); _isUsingClairvoyance = true; }
+    public void TurnOffClairevoyance() { if (_isUsingClairvoyance) _isUsingClairvoyance = false; _isOnClairvoyanceView = false; }
+    public void StopCastAnimation() { if (_animator.GetBool("IsCasting")) _animator.SetBool("IsCasting", false); }
+    public void StartCastAnimation() { if (!_animator.GetBool("IsCasting")) _animator.SetBool("IsCasting", true); }
     public void ShowHeat() => _heat.SetActive(true);
     public void HideHeat() => _heat.SetActive(false);
     public void SeesAKey(DungeonKey seenKey) {
@@ -113,9 +175,11 @@ public class Player : MonoBehaviour
     }
 
     public bool IfThereAreKeysNearby() => _visibleKeys.Count > 0;
-
+    
     private void ListenForMovement()
     {
+        if (Time.timeScale == 0) return;
+
         _movement.x = Input.GetAxisRaw("Horizontal");
         _movement.y = Input.GetAxisRaw("Vertical");
         _animator.SetFloat("Speed", _movement.sqrMagnitude);
@@ -128,38 +192,81 @@ public class Player : MonoBehaviour
             transform.localScale = scale;
         }
     }
-    private void ListenForPowerKey()
+
+    private void ListenForSkill()
     {
-        if (Input.GetKey(_powerViewKey) && _isPowerAvailable)
+        if (Input.GetKey(_usePowerKey) && _isPowerAvailable)
         {
-            _viewsManager.ActivatePowerView();
+            _viewsManager.ActivateSkill(GetCurrentPower());
         }
         else
         {
-            StopCasting();
-            _viewsManager.DeativatePowerView();
+            StopCastAnimation();
+            _soundManager.StopSecondaryAudio();
+            _viewsManager.DeactivateSkill();
         }
 
         if (_powerDurationBar.IsFull()) TurnOnPower();
         if (_powerDurationBar.IsEmpty()) ShutdownPower();
     }
+  
+    public void Meld()
+    {
+        const float goal = 0.4f;
+        const float fadeSpeed = 5f;
+
+        Color currentColor = _spriteRenderer.material.color;
+        if (currentColor.a != goal) {
+            float alphaValue = Mathf.Lerp(currentColor.a, goal, (fadeSpeed * Time.deltaTime));
+            _spriteRenderer.material.color = new Color(currentColor.r, currentColor.g, currentColor.b, alphaValue);
+        }
+    }
+    public void Unmeld()
+    {
+        if (_isUsingMeld) return;
+
+        const float goal = 1f;
+        const float fadeSpeed = 5f;
+
+        Color currentColor = _spriteRenderer.material.color;
+        if (currentColor.a != goal)
+        {
+            float alphaValue = Mathf.Lerp(currentColor.a, goal, (fadeSpeed * Time.deltaTime));
+            _spriteRenderer.material.color = new Color(currentColor.r, currentColor.g, currentColor.b, alphaValue);
+        }
+    }
 
     private void ListenForPauseKey()
     {
-        if (Input.GetKey(_pauseKey)) _gameManager.PauseGame();
+        if (Input.GetKeyDown(_pauseKey)) _menuManager.PauseGame();
     }
 
-
+    private void ListenForToggleNextPower()
+    {
+        if (Input.GetKeyDown(_toggleNextPowerKey))
+        {
+            ToggleNextPower();
+            _soundManager.PlayTertiarySound("skillSwitch");
+        }
+    }
 
     private void TurnOnPower() {
-        _isPowerAvailable = true;
-        _powerDurationBar.SetColor(Helper.ConvertColor(40, 197, 185, 255));
-        _powerDurationBar.HideLock();
+        if (!_isPowerAvailable)
+        {
+            _isPowerAvailable = true;
+            _powerDurationBar.SetColor(Helper.ConvertColor(40, 197, 185, 255));
+            _powerDurationBar.HideLock();
+            _soundManager.PlayTertiarySound("replenished");
+        }
     }
     private void ShutdownPower() {
-        _isPowerAvailable = false;
-        _powerDurationBar.SetColor(Helper.ConvertColor(67, 103, 118, 255));
-        _powerDurationBar.DisplayLock();
+        if (_isPowerAvailable)
+        {
+            _isPowerAvailable = false;
+            _powerDurationBar.SetColor(Helper.ConvertColor(67, 103, 118, 255));
+            _powerDurationBar.DisplayLock();
+            _soundManager.PlayTertiarySound("locked");
+        }
     }
 
     public void SlowDown() { _moveSpeed = _originalMoveSpeed / 2; }
@@ -168,20 +275,23 @@ public class Player : MonoBehaviour
 
     public void SpeedUp() { _moveSpeed = _originalMoveSpeed * 2; }
 
-    public void ConsumePowerDuration() { _powerDurationBar.DecreaseValueBy(1f * Time.deltaTime); }
+    public void ConsumeClairvoyanceDuration() { _powerDurationBar.DecreaseValueBy(1f * Time.deltaTime); }
+    public void ConsumeMeldDuration() { _powerDurationBar.DecreaseValueBy(1.5f * Time.deltaTime); }
     public void ReplenishPowerDuration() { _powerDurationBar.IncreaseValueBy(0.5f * Time.deltaTime); }
 
     public void AddKeyToInventory(DungeonKey key){
         _keyInventory.AddKey();
         StopsSeeingAKey(key);
         Destroy(key.transform.gameObject);
+        _soundManager.PlayPrimarySound("item_pickup");
     }
 
     public void UnlockDoor()
     {
         if(_keyInventory.IsComplete())
         {
-            _gameResultMenu.SetActive(true);
+            _menuManager.Victory();
+            _soundManager.PlayPrimarySound("unlock_door");
         }
     }
 
@@ -193,10 +303,32 @@ public class Player : MonoBehaviour
         _powerDurationBar.transform.gameObject.SetActive(true);
     }
 
-    public void HideStatusBar()
+    public void HideStatusUI()
     {
         _keyInventory.transform.gameObject.SetActive(false);
         _powerDurationBar.transform.gameObject.SetActive(false);
     }
+
+    private string GetCurrentPower() => _powers[_powerIndex];
+
+    public void ToggleNextPower()
+    {
+        if (_powerIndex < _powers.Length - 1)
+        {
+            _powerIndex++;
+        }
+        else
+        {
+            _powerIndex = 0;
+        }
+        UpdatePowerNameOnStatus();
+
+    }
+
+    private void UpdatePowerNameOnStatus() => _powerName.text = $"◄ {GetCurrentPower()} ►";
+
+
+    // ------------ Sound Functions
+
 
 }

@@ -171,13 +171,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48b6f65ae2bc9f6499853c73e0367838, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _gameResultMenu: {fileID: 0}
+  _keyAlert: {fileID: 858624797}
+  _menuManager: {fileID: 0}
   _viewsManager: {fileID: 0}
-  _heat: {fileID: 6941434998299464918}
+  _controlsManager: {fileID: 0}
   _moveSpeed: 2.5
-  _powerViewKey: 101
-  _pickupObjectKey: 102
   _powerDurationBar: {fileID: 0}
   _powerDurationInSeconds: 7
+  _heat: {fileID: 6941434998299464918}
   _keyInventory: {fileID: 0}
 --- !u!1 &3693870287816480476
 GameObject:
@@ -276,7 +278,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3052970e68ae3e74fb497b5830f4bf38, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 422595880}
   spriteRenderer: {fileID: 5827705101870485410}
   _fadeSpeed: 1000
 --- !u!1 &4390147022555838684

@@ -26,8 +26,7 @@ public class KeyInventory : MonoBehaviour
         ResetColor(_keyHolder2);
         ResetColor(_keyHolder3);
         ResetColor(_keyHolder4);
-        _keysNotice.SetActive(false);
-        _noticeHighlight.SetActive(false);
+        HideKeysNotice();
     }
 
     public void AddKey()
@@ -43,13 +42,11 @@ public class KeyInventory : MonoBehaviour
 
         if(_keyCount == _maxKeys)
         {
-            _keysNotice.SetActive(true);
-            _noticeHighlight.SetActive(true);
+            ShowKeysNotice();
         }
         else
         {
-            _keysNotice.SetActive(false);
-            _noticeHighlight.SetActive(false);
+            HideKeysNotice();
         }
     }
 
@@ -62,12 +59,23 @@ public class KeyInventory : MonoBehaviour
     private void ResetColor(GameObject holder)
     {
         Image image = holder.GetComponent<Image>();
-        image.color = new Color(0, 0, 0, 1);
+        image.color = Helper.ConvertColor(32, 32, 32, 255);
+
     }
 
     public bool IsComplete() => _keyCount == _maxKeys;
 
-  
+    private void ShowKeysNotice()
+    {
+        _keysNotice.SetActive(true);
+        _noticeHighlight.SetActive(true);
+    }
+
+    private void HideKeysNotice()
+    {
+        _keysNotice.SetActive(false);
+        _noticeHighlight.SetActive(false);
+    }
 
 
 }

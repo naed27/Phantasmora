@@ -12,10 +12,17 @@ public class StatusBar : MonoBehaviour
 
     public float Value { get { return _slider.value; } }
 
+    public void Init()
+    {
+        _slider.value = _slider.maxValue;
+        HideLock();
+    }
+
     public void SetMaxValue(float value)
     {
         _slider.maxValue = value;
         _slider.value = value;
+        SetColor(Helper.ConvertColor(40, 197, 185, 255));
     }
 
 

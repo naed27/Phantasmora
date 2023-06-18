@@ -72,8 +72,8 @@ public class DungeonManager : MonoBehaviour
         InitializeSpawnableTiles();
         SpawnGuards();
         SpawnDungeonKeys();
-
         _player.ShowStatusBar();
+
     }
 
     private void SetupMazeCells()

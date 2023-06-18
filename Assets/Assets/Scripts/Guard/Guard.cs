@@ -5,11 +5,12 @@ using UnityEngine;
 public class Guard : MonoBehaviour
 {
     // Properties
-    [SerializeField] private float _moveSpeed;
     [SerializeField] private PlayerSensor _playerSensor;
 
     private Player _player;
 
+    private const float _moveSpeed = 0.5f;
+    private float _alertSpeed;
     private Vector2 _movement;
     private Animator _animator;
     private Rigidbody2D _rigidBody2D;
@@ -37,7 +38,8 @@ public class Guard : MonoBehaviour
 
         // Setup identifications
         _dungeonManager = dungeonManager;
-        _player = dungeonManager.Player;
+        _player = _dungeonManager.Player;
+        _alertSpeed = _player.MoveSpeed - 0.5f;
 
         // Set Position
         transform.position = tile.Position;
@@ -80,7 +82,7 @@ public class Guard : MonoBehaviour
 
     void FixedUpdate()
     {
-        float moveSpeed = (_playerSensor.PlayerIsClose) ? _moveSpeed * 4 : _moveSpeed;
+        float moveSpeed = (_playerSensor.PlayerIsClose) ? _alertSpeed : _moveSpeed;
         _rigidBody2D.MovePosition(_rigidBody2D.position + moveSpeed * Time.fixedDeltaTime * _movement.normalized);
     }
 
@@ -105,7 +107,7 @@ public class Guard : MonoBehaviour
             List<Tile> choices = Helper.FilterList(tile.Neighbors, tile => tile.IsFloor());
             _previousTile = tile;
             _goalTile = choices[Helper.GenerateRandomNumber(0, choices.Count - 1)];
-            targetTile = _goalTile.Id;// for debug
+            targetTile = _goalTile.Id;
         }
     }
 

@@ -12,8 +12,6 @@ public class MeshField : MonoBehaviour
     [SerializeField] private float _originalRayLength = 0f;
     [SerializeField] private float _maximumRayLength = 0f;
     [SerializeField] private float _shrinkSpeed = 2f;
-    [SerializeField] private float _enlargeSpeed = 2f;
-
 
     // ------------------ mesh properties
 
@@ -21,11 +19,17 @@ public class MeshField : MonoBehaviour
     private Player _player;
     private LayerMask _masksToCollideWith;
 
-    private float _currentRayLength;
+    public float _currentRayLength;
 
     private int _raySpan;
     private int _rayCount;
     private float _rayAngle;
+    private bool _breatheEffect = false;
+    private float _breatheCap = 2;
+    private float _breatheScore = 0;
+    [SerializeField] private float _breathePace = 0.05f;
+    private bool _allowBreathing = false;
+
 
     private Vector3[] _vertices;
     private int[] _triangles;
@@ -37,12 +41,8 @@ public class MeshField : MonoBehaviour
     public float MaximumRayLength { get { return _maximumRayLength; } }
     public float OriginalRayLength { get { return _originalRayLength; } }
 
-    public void Init(Player player, LayerMask maskToCollideWith)
+    public void Start()
     {
-        // Setup Properties
-        _player = player;
-        _masksToCollideWith = maskToCollideWith;
-
         // Create a new mesh
         _mesh = new Mesh();
         _meshDrawOrigin = Vector3.zero;
@@ -51,12 +51,23 @@ public class MeshField : MonoBehaviour
         // Setup mesh
         _raySpan = 360;
         _rayCount = 360;
-        _currentRayLength = _originalRayLength;
         _rayAngle = _raySpan / _rayCount;
+        _currentRayLength = _originalRayLength;
 
         _vertices = new Vector3[_rayCount + 2];
         _triangles = new int[_rayCount * 3];
         _vertices[0] = _meshDrawOrigin;
+    }
+
+    public void Init(Player player, LayerMask maskToCollideWith, bool breatheEffect = false)
+    {
+        // Setup Properties
+        _player = player;
+        _masksToCollideWith = maskToCollideWith;
+
+        _breatheEffect = breatheEffect;
+        _breatheCap = _breathePace * 3.5f;
+        _currentRayLength = _originalRayLength;
 
     }
 
@@ -64,11 +75,30 @@ public class MeshField : MonoBehaviour
     {
         UpdateFieldOfView();
         UpdateMeshPosition();
+        Breathe();
+
+    }
+
+    private void Breathe()
+    {
+        if (!_player) return;
+
+        if (ReachedOriginalLength() && !_allowBreathing)
+            AllowBreathing();
+
+        if (_breatheEffect && _allowBreathing)
+        {
+            _currentRayLength -= _breathePace * Time.fixedDeltaTime;
+            _breatheScore += _breathePace * Time.fixedDeltaTime;
+            if (_breatheScore >= _breatheCap || _breatheScore <= 0)
+                _breathePace *= -1;
+        }
     }
 
 
     private void UpdateMeshPosition()
     {
+        if (!_player) return;
         Vector3 currentPosition = _player.transform.position;
         currentPosition.z = -1;
         transform.position = currentPosition;
@@ -104,13 +134,26 @@ public class MeshField : MonoBehaviour
     public void Enlarge(float limit)
     {
         if (_currentRayLength < limit) 
-            _currentRayLength += (_enlargeSpeed - _currentRayLength) * Time.fixedDeltaTime;
+            _currentRayLength += (_maximumRayLength - _currentRayLength) * Time.fixedDeltaTime;
     }
 
-    public void Shrink()
+    public void Shrink(float limit = 0)
     {
-        if (_currentRayLength > 0) 
+        if (_currentRayLength > limit) 
             _currentRayLength -= (_shrinkSpeed) * Time.fixedDeltaTime;
     }
+
+    public void Resize(float goal = 0)
+    {
+        if(_currentRayLength!=goal)
+            _currentRayLength = Mathf.Lerp(_currentRayLength, goal, (_shrinkSpeed) * Time.fixedDeltaTime);
+    }
+
+    public bool ReachedOriginalLength() => _currentRayLength >= _originalRayLength - 0.001f || _currentRayLength <= _originalRayLength + 0.001f;
+    public bool ReachedSpecificLength(float length) => _currentRayLength >= length - 0.001f || _currentRayLength <= length + 0.001f;
+
+    public void AllowBreathing() => _allowBreathing = true;
+    public void DisallowBreathing() => _allowBreathing = false;
+
 
 }

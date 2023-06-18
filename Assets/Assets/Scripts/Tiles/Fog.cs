@@ -26,7 +26,7 @@ public class Fog : MonoBehaviour
 
     private void Update()
     {
-        if (_player.IsUsingPowerView && _mode == "in") { DoFadeOut(); }
+        if (_player.IsUsingClairvoyance && _mode == "in" || _player.IsUsingMeld && _mode == "in" ) { DoFadeOut(); }
         if (_mode == "in") Fade(_lowestFogIntensity);
         if (_mode == "out") Fade(_highestFogIntensity);
     }
@@ -45,7 +45,7 @@ public class Fog : MonoBehaviour
         GameObject hitObject = collisionTarget.gameObject;
         if (hitObject.CompareTag("Player"))
             if (hitObject.TryGetComponent(out Player player))
-                if (_isWall && !player.IsUsingPowerView)
+                if (_isWall && !player.IsUsingClairvoyance && !player.IsUsingMeld)
                     DoFadeIn();
     }
 
